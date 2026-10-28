@@ -1,0 +1,2014 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Triage – Semestre Filtro</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--ink:#1b1f24;--muted:#5b6672;--line:#d5dae0;--acc:#1f5fbf;--acc-ink:#fff;--ok:#1b7a3d;--ko:#b3261e;--warn-bg:#fdeceb;--warn-ink:#8c1d18;--note-bg:#eef3fb;
+--e-certo:#1b7a3d;--e-calc:#1f5fbf;--e-eur:#8a5a00;--e-stima:#6a3fa0;--e-nv:#b3261e;--e-cg:#006b6b;--e-bg:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#14171a;--card:#1d2126;--ink:#e8ebee;--muted:#a1abb5;--line:#343b43;--acc:#6aa3ff;--acc-ink:#0b1220;--ok:#5fcf86;--ko:#ff8a80;--warn-bg:#3b1816;--warn-ink:#ffb4ab;--note-bg:#1b2634;
+--e-certo:#5fcf86;--e-calc:#6aa3ff;--e-eur:#f0b84a;--e-stima:#c9a3ff;--e-nv:#ff8a80;--e-cg:#5fd6d6;--e-bg:#14171a}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line)}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px}
+h1{font-size:1.1rem;margin:0;padding:10px 0 4px}
+nav{display:flex;gap:4px;overflow-x:auto;padding-bottom:8px}
+nav button{flex:1 0 auto;min-height:44px;padding:0 8px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;font:inherit;cursor:pointer}
+nav button[aria-current="page"]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);font-weight:600}
+main{max-width:760px;margin:0 auto;padding:16px}
+h2{font-size:1.25rem;margin:0 0 8px}
+h3{font-size:1.05rem;margin:16px 0 6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin:0 0 12px}
+.card>h3:first-child{margin-top:0}
+.card>p:last-child,.card>.riga:last-child{margin-bottom:0}
+p{margin:0 0 8px}
+.muted{color:var(--muted)}
+.small{font-size:.9rem}
+.avviso{background:var(--warn-bg);color:var(--warn-ink);border-bottom:1px solid var(--ko);padding:10px 16px;font-weight:600}
+.nota{background:var(--note-bg);border-radius:8px;padding:8px 10px;margin:8px 0;font-size:.92rem}
+.prov{background:var(--warn-bg);color:var(--warn-ink);border:1px solid var(--ko);border-radius:8px;padding:8px 10px;margin:0 0 12px;font-weight:600}
+button.p,button.s,button.t{font:inherit;min-height:48px;padding:0 16px;border-radius:10px;border:1px solid var(--acc);cursor:pointer}
+button.p{background:var(--acc);color:var(--acc-ink);font-weight:600}
+button.s{background:var(--card);color:var(--acc)}
+button.t{background:transparent;color:var(--muted);border-color:var(--line);min-height:44px}
+button:disabled{opacity:.5;cursor:not-allowed}
+button.blocco{display:block;width:100%;margin:0 0 8px;text-align:left;padding:10px 14px;min-height:56px}
+.riga{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+label.campo{display:block;font-weight:600;margin:0 0 4px}
+input[type=text],textarea{font:inherit;width:100%;min-height:48px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+textarea{min-height:90px}
+.griglia2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.tabwrap{overflow-x:auto;margin:0 0 8px}
+.esito-ok{color:var(--ok);font-weight:700}.esito-ko{color:var(--ko);font-weight:700}
+.risultato{margin-top:10px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg)}
+.risultato p{margin:0 0 4px}
+.err{color:var(--ko);font-weight:600}
+.stato{display:inline-block;font-size:.85rem;border:1px solid var(--line);border-radius:6px;padding:1px 8px;margin-left:6px;white-space:nowrap}
+.stato.letto{color:var(--ok);border-color:var(--ok)}
+.et{display:inline-block;font-size:.82rem;font-weight:700;line-height:1.3;padding:0 6px;border-radius:5px;border:1.5px solid currentColor;background:var(--e-bg);vertical-align:baseline;margin:0 1px}
+.et-certo{color:var(--e-certo)}.et-calc{color:var(--e-calc)}.et-eur{color:var(--e-eur)}.et-stima{color:var(--e-stima)}.et-nv{color:var(--e-nv)}.et-cg{color:var(--e-cg)}
+.ver{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 10px;background:var(--card)}
+.ver .riga{margin:8px 0 0}
+.ver .riga button{flex:1 1 120px}
+.ver .esito{margin-top:8px}
+.tempo{font-size:3rem;font-weight:700;text-align:center;font-variant-numeric:tabular-nums;line-height:1.1;margin:4px 0}
+.conta{display:flex;align-items:center;gap:10px;margin:8px 0}
+.conta button{flex:1 1 0;min-height:72px;font-size:2rem;padding:0}
+.conta .n{flex:1 1 0;text-align:center;font-size:2.4rem;font-weight:700;font-variant-numeric:tabular-nums}
+.box{border:2px solid var(--acc);border-radius:10px;padding:10px 12px;margin:8px 0;background:var(--note-bg)}
+.box.riserva{border-color:var(--e-eur)}
+.sub{display:flex;gap:6px;margin:0 0 12px}
+.sub button{flex:1 1 0}
+.sub button[aria-pressed="true"]{background:var(--acc);color:var(--acc-ink)}
+.prog{font-variant-numeric:tabular-nums}
+.seg{display:flex;gap:6px;margin:0 0 8px}
+.seg button{flex:1 1 0;min-height:44px;padding:0 6px;border:1px solid var(--acc);border-radius:10px;background:var(--card);color:var(--acc);font:inherit;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--acc);color:var(--acc-ink);font-weight:600}
+select{font:inherit;width:100%;min-height:44px;padding:6px 8px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+.sessione label{display:block;font-size:.85rem;font-weight:600;margin:4px 0 2px}
+.rip{background:var(--e-eur);color:var(--e-bg);font-weight:700;font-size:.92rem;padding:6px 10px;border-radius:8px;margin:0 0 8px}
+.sessione label.ripswitch{font-size:1rem;font-weight:400;display:flex;align-items:center;gap:8px;min-height:44px;margin:20px 0 0}
+.sessione{padding:10px 12px}.sessione .seg{margin:0 0 4px}.conf h3{font-size:1rem}
+.ripswitch input{width:24px;height:24px}
+.conf button{display:block;width:100%;min-height:52px;margin:0 0 8px;text-align:left;padding:6px 14px}
+.evid{background:var(--warn-bg);color:var(--warn-ink);border:1px solid var(--ko);border-radius:8px;padding:8px 10px;margin:8px 0;font-weight:600;font-size:.92rem}
+.voce{border-top:1px solid var(--line);padding:8px 0}
+.voce:first-of-type{border-top:0}
+.voce .riga{margin:6px 0 0}
+.voce .riga button{min-height:44px;padding:0 12px}
+.sbloccato{color:var(--ok);font-weight:700}
+.unita{border-top:1px solid var(--line);padding:8px 0}
+.unita:first-of-type{border-top:0}
+.ud{font-weight:600}
+[hidden]{display:none!important}
+@media (max-width:480px){main{padding:12px}.riga.largo button{flex:1 1 100%}}
+</style>
+</head>
+<body>
+<div id="avvisi"></div>
+<header><div class="wrap"><h1>Triage – Semestre Filtro</h1><nav id="nav" aria-label="Sezioni"></nav></div></header>
+<main id="main"></main>
+<script id="motore">/* motore_f4a.js - Motore di calcolo dell'app (F4-a, 27/10/2026)
+ *
+ * Porting in JavaScript delle funzioni di riferimento Python:
+ *   - claude/SCRIPT_F3b.md, Codice 2 (riferimento_app_f3b.py): c_min, bb_pmf, bin_pmf, conv, p_supera,
+ *     quote_attese, raccomanda, wilson, etichetta_unita
+ *   - claude/SCRIPT_F3c.md (tempo_f3c.py): budget_s, checkpoint, limite_morbido_s, proiezione, ranghi_mediana,
+ *     mediana_ic, p_supera (gruppi), p_non_letti_peggiori, p_non_letti_casuali, normalizza, corretta_rigorosa
+ *   - claude/SPEC_F4.md §5.4 (esame: P(3 su 3), P(>= 2 su 3)) e §6 (misura del tempo)
+ *
+ * Regole d'esame: DM 941 art. 7 c.3, art. 8 c.1 e c.3; Allegato 2 punti 4 e 6.
+ * Nessuna interfaccia, nessun dataset, nessuna dipendenza, nessun accesso a rete/storage.
+ * Un solo file: funziona in Node (CommonJS) e nel browser (globale MotoreF4).
+ * Requisiti: BigInt (Chrome 67+, Safari 14+), String.prototype.normalize, ES2019.
+ *
+ * Nomi delle funzioni = nomi del riferimento Python (snake_case), per poter confrontare riga per riga.
+ * Differenze di forma rispetto a Python (stessi valori numerici):
+ *   - le tuple Python diventano array o oggetti con campi nominati (vedi commenti);
+ *   - 'scenari' di raccomanda() e' un ARRAY ordinato (le chiavi float di un dizionario non sono portabili);
+ *   - etichetta_unita() restituisce {codice, testo}: il codice e' stabile, il testo e' quello di SPEC_F4 §5.2
+ *     (con gli accenti; il riferimento Python usa una versione ASCII del testo).
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) { module.exports = factory(); }
+  else { root.MotoreF4 = factory(); }
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  // ------------------------------------------------------------------ costanti
+  const SOGLIA = 25;               // risposte minime per livello e per unita' (D4a, Q22) [decisione utente]
+  const PRIOR_A = 0.5, PRIOR_B = 0.5;   // prior di Jeffreys per ogni livello [scelta di Claude, F3 passo 2]
+  const RIF_MIN = 100;             // risposte minime nel riferimento per etichettare un'unita' [EURISTICA]
+  const Z95 = 1.959963984540054, Z99 = 2.5758293035489004;
+  const SCENARI = [0.0, -0.05, -0.10];  // spostamenti additivi delle p (robustezza) [EURISTICA]
+  const LIVELLI = ['A', 'M', 'B'];      // ordine nominale: Alta, Media, Bassa
+  const TEMPO_S = 50 * 60;              // DM 941 art. 7 c.3
+  const NQ = 31, NC = 21, NM = 10;      // Allegato 2 punto 4
+  const RISERVA_DEFAULT_S = 180;        // [EURISTICA, scelta di Claude]
+  const MOLT_SOFT = 2.0;                // [EURISTICA, scelta di Claude]
+  const G_CROC = 0.20;                  // probabilita' di indovinare una crocetta a 5 opzioni (Allegato 2 punto 4)
+  const TEMPO_MAX_S = 900;              // SPEC §6: tempo > 900 s registrato come 900 con flag
+
+  // ------------------------------------------------------------------ utilita'
+  function assertInt(x, nome) {
+    if (!Number.isInteger(x)) throw new RangeError(nome + ' deve essere un intero: ' + x);
+  }
+
+  /** coefficiente binomiale esatto (BigInt) convertito in Number (esatto per m <= 56) */
+  function comb(m, k) {
+    if (k < 0 || k > m) return 0;
+    if (k > m - k) k = m - k;
+    let r = 1n;
+    for (let i = 1; i <= k; i++) r = (r * BigInt(m - k + i)) / BigInt(i);
+    return Number(r);
+  }
+
+  // ------------------------------------------------------------------ regola d'esame
+  /** giuste minime con A risposte date: 11C - A >= 180 (DM 941 art. 8 c.1, c.3). Ritorna un intero; se > A e' impossibile. */
+  function c_min(A) {
+    assertInt(A, 'A');
+    if (A < 0) throw new RangeError('A < 0');
+    return Math.floor((180 + A + 10) / 11);   // ceil((180 + A) / 11) in aritmetica intera
+  }
+
+  // ------------------------------------------------------------------ distribuzioni
+  /** Beta-Binomiale(m; a, b) per ricorrenza, senza funzioni gamma. Ritorna array di lunghezza m + 1. */
+  function bb_pmf(m, a, b) {
+    assertInt(m, 'm');
+    let p0 = 1.0;
+    for (let i = 0; i < m; i++) p0 *= (b + i) / (a + b + i);
+    const pmf = [p0];
+    for (let k = 0; k < m; k++) {
+      pmf.push(pmf[pmf.length - 1] * ((m - k) * (a + k)) / ((k + 1) * (b + m - k - 1)));
+    }
+    return pmf;
+  }
+
+  function bin_pmf(m, p) {
+    assertInt(m, 'm');
+    const out = [];
+    for (let k = 0; k <= m; k++) out.push(comb(m, k) * Math.pow(p, k) * Math.pow(1 - p, m - k));
+    return out;
+  }
+
+  function conv(x, y) {
+    const out = new Array(x.length + y.length - 1).fill(0.0);
+    for (let i = 0; i < x.length; i++) {
+      for (let j = 0; j < y.length; j++) out[i + j] += x[i] * y[j];
+    }
+    return out;
+  }
+
+  function somma(arr, da) {
+    let s = 0;
+    for (let i = da; i < arr.length; i++) s += arr[i];
+    return s;
+  }
+
+  /**
+   * parti = [[m, a, b], ...]: m domande risposte nella cella con posteriore Beta(a, b).
+   * plug = false: predittiva esatta (somma di Beta-Binomiali); plug = true: Binomiali con p = a/(a+b).
+   * Ritorna P(giuste >= c_min(A)), dove A = totale delle risposte date.
+   */
+  function p_supera(parti, A, plug) {
+    let pmf = [1.0];
+    for (const [m, a, b] of parti) {
+      pmf = conv(pmf, plug ? bin_pmf(m, a / (a + b)) : bb_pmf(m, a, b));
+    }
+    const c = c_min(A);
+    return c > A ? 0.0 : somma(pmf, c);
+  }
+
+  /**
+   * Variante di SCRIPT_F3c: gruppi = [[m, p], ...] con p nota; i gruppi con m = 0 sono saltati.
+   * (Stessa regola di c_min; usata per i quesiti non letti e per i profili ipotetici.)
+   */
+  function p_supera_gruppi(gruppi, A) {
+    let pmf = [1.0];
+    for (const [m, p] of gruppi) {
+      if (m > 0) pmf = conv(pmf, bin_pmf(m, p));
+    }
+    const c = c_min(A);
+    return c > A ? 0.0 : somma(pmf, c);
+  }
+
+  // ------------------------------------------------------------------ composizione attesa
+  /** composizione attesa di 31 domande dalle risposte della materia (resto piu' grande). conteggi: {A, M, B}. */
+  function quote_attese(conteggi) {
+    let tot = 0;
+    for (const c of LIVELLI) tot += conteggi[c];
+    if (!(tot > 0)) throw new RangeError('quote_attese: nessuna risposta');
+    const raw = {}, base = {};
+    let sb = 0;
+    for (const c of LIVELLI) { raw[c] = NQ * conteggi[c] / tot; base[c] = Math.floor(raw[c]); sb += base[c]; }
+    const resto = NQ - sb;
+    const ord = LIVELLI.slice().sort((x, y) => {
+      const d = -(raw[x] - base[x]) - (-(raw[y] - base[y]));
+      return d !== 0 ? d : LIVELLI.indexOf(x) - LIVELLI.indexOf(y);
+    });
+    for (const c of ord.slice(0, resto)) base[c] += 1;
+    return base;
+  }
+
+  /**
+   * SPEC §5.3: composizione ATTESA della materia, solo con >= SOGLIA prime risposte nella materia.
+   * conteggi: {A, M, B} = prime risposte della materia per livello. Altrimenti {stato:'dati insufficienti', mancano}.
+   */
+  function composizione_attesa(conteggi) {
+    let tot = 0;
+    for (const c of LIVELLI) tot += conteggi[c];
+    if (tot < SOGLIA) return { stato: 'dati insufficienti', mancano: SOGLIA - tot };
+    return { stato: 'ok', comp: quote_attese(conteggi) };
+  }
+
+  // ------------------------------------------------------------------ raccomandazione S18 / S29 / S31
+  /**
+   * celle: {A: [k, n], M: [k, n], B: [k, n]} prime risposte per livello (k giuste su n);
+   * comp: {A, M, B} con somma 31 (attesa o realizzata).
+   * Se un livello ha n < SOGLIA: {stato: 'dati insufficienti', mancano: {livello: risposte_mancanti}}.
+   * Altrimenti {stato: 'ok', p_hat, ordine, scenari: [{shift, P: {18, 29, 31}, migliore, decisione}, ...]}
+   * con scenari nell'ordine di SCENARI (0, -0.05, -0.10).
+   */
+  function raccomanda(celle, comp) {
+    const mancano = {};
+    let manca = false;
+    for (const c of LIVELLI) {
+      const [k, n] = celle[c];
+      assertInt(k, 'k'); assertInt(n, 'n');
+      if (k < 0 || k > n) throw new RangeError('celle[' + c + ']: k deve stare in [0, n]');
+      if (n < SOGLIA) { mancano[c] = SOGLIA - n; manca = true; }
+    }
+    if (manca) return { stato: 'dati insufficienti', mancano };
+    let sc = 0;
+    for (const c of LIVELLI) { assertInt(comp[c], 'comp'); if (comp[c] < 0) throw new RangeError('comp < 0'); sc += comp[c]; }
+    if (sc !== NQ) throw new RangeError('la composizione deve sommare a 31 (somma: ' + sc + ')');
+
+    const post = {}, pm = {};
+    for (const c of LIVELLI) {
+      const [k, n] = celle[c];
+      post[c] = [PRIOR_A + k, PRIOR_B + n - k];
+      pm[c] = post[c][0] / (post[c][0] + post[c][1]);
+    }
+    const ordine = LIVELLI.slice().sort((x, y) => (pm[y] - pm[x]) || (LIVELLI.indexOf(x) - LIVELLI.indexOf(y)));
+    const ids = [];
+    for (const c of ordine) for (let i = 0; i < comp[c]; i++) ids.push(c);
+
+    function parti(A, shift) {
+      const cnt = new Map();   // ordine di inserimento = ordine di prima comparsa (come il dict Python)
+      for (const c of ids.slice(0, A)) cnt.set(c, (cnt.get(c) || 0) + 1);
+      const out = [];
+      for (const [c, m] of cnt) {
+        if (shift === null) out.push([m, post[c][0], post[c][1]]);
+        else {
+          const p = Math.min(0.99, Math.max(0.01, pm[c] + shift));
+          out.push([m, p, 1 - p]);
+        }
+      }
+      return out;
+    }
+
+    const scenari = [];
+    for (const sh of SCENARI) {
+      const P = {};
+      for (const A of [18, 29, 31]) P[A] = p_supera(parti(A, sh === 0.0 ? null : sh), A, sh !== 0.0);
+      let best = 18;   // massimo per (P, A): a parita' di P vince A piu' grande
+      for (const A of [29, 31]) if (P[A] > P[best] || (P[A] === P[best] && A > best)) best = A;
+      const ordinati = [P[18], P[29], P[31]].sort((a, b) => b - a);
+      scenari.push({
+        shift: sh, P, migliore: best,
+        decisione: (ordinati[0] - ordinati[1] >= 0.01) ? ('S' + best) : 'equivalenti (differenza < 1 punto)'
+      });
+    }
+    return { stato: 'ok', p_hat: pm, ordine, scenari };
+  }
+
+  // ------------------------------------------------------------------ intervallo di Wilson e etichette unita'
+  /** intervallo di Wilson per k successi su n con quantile z. Ritorna [inferiore, superiore]. */
+  function wilson(k, n, z) {
+    const ph = k / n, d = 1 + z * z / n;
+    const c = (ph + z * z / (2 * n)) / d;
+    const h = z * Math.sqrt(ph * (1 - ph) / n + z * z / (4 * n * n)) / d;
+    return [c - h, c + h];
+  }
+
+  const TESTI_ETICHETTA = {
+    DATI_INSUFFICIENTI: 'dati insufficienti',
+    RIFERIMENTO_INSUFFICIENTE: 'valore mostrato, nessuna etichetta (riferimento insufficiente)',
+    SEGNALE_DEBOLE: 'SEGNALE: più debole della tua media sulle altre unità',
+    SEGNALE_FORTE: 'SEGNALE: più forte della tua media sulle altre unità',
+    INDIZIO_DEBOLE: 'INDIZIO: più debole (da confermare)',
+    INDIZIO_FORTE: 'INDIZIO: più forte (da confermare)',
+    NESSUNA_DIFFERENZA: 'nessuna differenza dimostrata'
+  };
+
+  /**
+   * k giuste su n prime risposte dell'unita'; (k_rif, n_rif) = somma delle ALTRE unita' della stessa materia.
+   * Ritorna {codice, testo}. Testi: SPEC_F4 §5.2 (il testo dice "più debole della tua media", mai "sei debole in X").
+   */
+  function etichetta_unita(k, n, k_rif, n_rif) {
+    const esito = (codice) => ({ codice, testo: TESTI_ETICHETTA[codice] });
+    if (n < SOGLIA) return esito('DATI_INSUFFICIENTI');
+    if (n_rif < RIF_MIN) return esito('RIFERIMENTO_INSUFFICIENTE');
+    const ref = k_rif / n_rif;
+    const [lo99, hi99] = wilson(k, n, Z99), [lo95, hi95] = wilson(k, n, Z95);
+    if (hi99 < ref) return esito('SEGNALE_DEBOLE');
+    if (lo99 > ref) return esito('SEGNALE_FORTE');
+    if (hi95 < ref) return esito('INDIZIO_DEBOLE');
+    if (lo95 > ref) return esito('INDIZIO_FORTE');
+    return esito('NESSUNA_DIFFERENZA');
+  }
+
+  // ------------------------------------------------------------------ esame (SPEC §5.4)
+  /**
+   * Indicatori secondari con P_m = P(superare) della strategia scelta per ciascuna delle 3 materie.
+   * ASSUME indipendenza tra materie (l'abilita' comune le correla) e tentativo unico.
+   * p3 = [P1, P2, P3]. Ritorna {tre_su_tre, almeno_due}.
+   */
+  function esame_indicatori(p3) {
+    if (!Array.isArray(p3) || p3.length !== 3) throw new RangeError('servono 3 probabilita');
+    const [a, b, c] = p3;
+    return {
+      tre_su_tre: a * b * c,
+      almeno_due: a * b + a * c + b * c - 2 * a * b * c
+    };
+  }
+
+  // ------------------------------------------------------------------ tempo (SPEC §6)
+  /** secondi per quesito, con una riserva finale (per barrare i cerchietti delle omesse e ricontrollare) [EURISTICA] */
+  function budget_s(riserva_s) {
+    if (riserva_s === undefined) riserva_s = RISERVA_DEFAULT_S;
+    return (TEMPO_S - riserva_s) / NQ;
+  }
+
+  /** quesiti che, a ritmo uniforme, dovresti aver affrontato dopo 'minuti' minuti (parte intera, per difetto) */
+  function checkpoint(minuti, riserva_s) {
+    if (riserva_s === undefined) riserva_s = RISERVA_DEFAULT_S;
+    return Math.min(NQ, Math.floor(NQ * minuti * 60 / (TEMPO_S - riserva_s)));
+  }
+
+  function limite_morbido_s(riserva_s, molt) {
+    if (riserva_s === undefined) riserva_s = RISERVA_DEFAULT_S;
+    if (molt === undefined) molt = MOLT_SOFT;
+    return molt * budget_s(riserva_s);
+  }
+
+  /**
+   * tempo totale atteso: 21 x media crocette + 10 x media completamento (si usa la MEDIA, non la mediana).
+   * Ritorna {totale_s, disponibile_s, non_entrano}. Ipotesi: ritmo uniforme, tempo di pratica = tempo d'esame.
+   */
+  function proiezione(media_c_s, media_m_s, riserva_s) {
+    if (riserva_s === undefined) riserva_s = RISERVA_DEFAULT_S;
+    const tot = NC * media_c_s + NM * media_m_s;
+    const disp = TEMPO_S - riserva_s;
+    if (tot <= disp) return { totale_s: tot, disponibile_s: disp, non_entrano: 0 };
+    return { totale_s: tot, disponibile_s: disp, non_entrano: NQ - Math.floor(NQ * disp / tot) };
+  }
+
+  /**
+   * Intervallo per la mediana senza ipotesi sulla distribuzione: [x_(l), x_(u)], u = n + 1 - l,
+   * l = massimo con P(Bin(n, 0.5) <= l - 1) <= alpha/2. Ritorna {l, u, copertura} oppure null se n e' troppo piccolo.
+   * La funzione di ripartizione binomiale e' calcolata in modo ESATTO (BigInt), senza librerie.
+   */
+  function ranghi_mediana(n, livello) {
+    assertInt(n, 'n');
+    if (n < 0) throw new RangeError('n < 0');
+    if (livello === undefined) livello = 0.95;
+    const a = 1 - livello;
+    const denom = 1n << BigInt(n);   // 2^n
+    const SC = 60n;                  // conversione in Number con 60 bit frazionari
+    const cdfNum = (cum) => Number((cum << SC) / denom) / Math.pow(2, 60);
+    // Se n e' molto grande 2^n non e' un problema (BigInt), ma il ciclo e' O(n): n resta di ordine centinaia/migliaia.
+    let l = 0;
+    let cum = 1n;                    // somma C(n,0..l) = P(X <= l) * 2^n
+    let binom_l = 1n;                // C(n, l)
+    const cdfFinoA = [];             // cache: cdf(l) per l = 0..
+    cdfFinoA.push(cdfNum(cum));
+    while (cdfFinoA[l] <= a / 2) {
+      l += 1;
+      binom_l = (binom_l * BigInt(n - l + 1)) / BigInt(l);   // C(n, l)
+      cum += binom_l;
+      cdfFinoA.push(cdfNum(cum));
+    }
+    const lo = l;
+    if (lo < 1) return null;
+    return { l: lo, u: n + 1 - lo, copertura: 1 - 2 * cdfFinoA[lo - 1] };
+  }
+
+  /** mediana con IC. Ritorna {mediana, lo, hi}; lo e hi sono null se n e' troppo piccolo per l'intervallo. */
+  function mediana_ic(tempi, livello) {
+    const x = tempi.slice().sort((p, q) => p - q), n = x.length;
+    if (n === 0) throw new RangeError('mediana_ic: lista vuota');
+    const med = (n % 2) ? x[(n - 1) / 2] : (x[n / 2 - 1] + x[n / 2]) / 2;
+    const r = ranghi_mediana(n, livello);
+    if (r === null) return { mediana: med, lo: null, hi: null };
+    return { mediana: med, lo: x[r.l - 1], hi: x[r.u - 1] };
+  }
+
+  /** SPEC §6: un tempo > 900 s si registra come 900 con troncato = vero. */
+  function tronca_tempo(secondi) {
+    if (!(secondi >= 0)) throw new RangeError('tempo negativo o non numerico');
+    return secondi > TEMPO_MAX_S ? { tempo_s: TEMPO_MAX_S, troncato: true } : { tempo_s: secondi, troncato: false };
+  }
+
+  /**
+   * SPEC §6: statistiche descrittive del tempo (per formato e/o livello), solo con n >= SOGLIA.
+   * Sotto soglia: {stato:'dati insufficienti', n, mancano}. Altrimenti {stato:'ok', n, media, mediana, lo, hi, copertura}.
+   */
+  function statistiche_tempo(tempi, livello) {
+    const n = tempi.length;
+    if (n < SOGLIA) return { stato: 'dati insufficienti', n, mancano: SOGLIA - n };
+    let s = 0;
+    for (const t of tempi) s += t;
+    const m = mediana_ic(tempi, livello), r = ranghi_mediana(n, livello);
+    return { stato: 'ok', n, media: s / n, mediana: m.mediana, lo: m.lo, hi: m.hi, copertura: r ? r.copertura : null };
+  }
+
+  // ------------------------------------------------------------------ costo dei quesiti non letti (SPEC §6, informativo)
+  /** gli m quesiti non letti sono i meno sicuri (prima i completamenti): lasciati in bianco */
+  function p_non_letti_peggiori(pc, pm, m) {
+    assertInt(m, 'm');
+    const rm = Math.min(m, NM), rc = m - rm;
+    return p_supera_gruppi([[NC - rc, pc], [NM - rm, pm]], NQ - m);
+  }
+
+  /**
+   * gli m quesiti non letti sono un sottoinsieme CASUALE: media esatta sulla ipergeometrica.
+   * indovina = true: le crocette non lette vengono segnate a caso (p = 0.2); i completamenti non letti restano in bianco.
+   */
+  function p_non_letti_casuali(pc, pm, m, indovina) {
+    assertInt(m, 'm');
+    let tot = 0.0;
+    for (let j = 0; j <= Math.min(m, NC); j++) {
+      const k = m - j;
+      if (k > NM) continue;
+      const w = comb(NC, j) * comb(NM, k) / comb(NQ, m);
+      if (indovina) tot += w * p_supera_gruppi([[NC - j, pc], [j, G_CROC], [NM - k, pm]], NQ - k);
+      else tot += w * p_supera_gruppi([[NC - j, pc], [NM - k, pm]], NQ - m);
+    }
+    return tot;
+  }
+
+  /**
+   * giuste minime e errori ammessi con m quesiti non letti (A = 31 - m risposte date) [CERTO come aritmetica, DM 941 art. 8].
+   * Ritorna {A, giuste_minime, errori_ammessi} oppure {A, impossibile: true}.
+   */
+  function giuste_minime_non_letti(m) {
+    assertInt(m, 'm');
+    const A = NQ - m, c = c_min(A);
+    return c > A ? { A, impossibile: true } : { A, giuste_minime: c, errori_ammessi: A - c };
+  }
+
+  // ------------------------------------------------------------------ completamento: confronto rigoroso (Q24 = b)
+  // Equivalenti esatti del riferimento Python:
+  //  - str.isspace() / \s di re per str: [\t\n\v\f\r], 0x1C-0x1F, ' ', 0x85, 0xA0, 0x1680, 0x2000-0x200A, 0x2028, 0x2029, 0x202F, 0x205F, 0x3000
+  //  - unicodedata.combining(ch) != 0: classe di combinazione canonica diversa da 0 (tabella COMBINING_CCC)
+  const WS = '\\t\\n\\u000b\\f\\r\\u001c-\\u001f \\u0085\\u00a0\\u1680\\u2000-\\u200a\\u2028\\u2029\\u202f\\u205f\\u3000';
+  const RE_WS_RUN = new RegExp('[' + WS + ']+', 'g');
+  const RE_WS_EDGE = new RegExp('^[' + WS + ']+|[' + WS + ']+$', 'g');
+  const RE_MARGINE = new RegExp('^[' + WS + '.,;:!?\'"()\\[\\]-]+|[' + WS + '.,;:!?\'"()\\[\\]-]+$', 'g');
+  // Tabella generata da gen_vettori_f4a.py (unicodedata.combining(ch) != 0, intervalli [inizio, fine] di code point).
+  const COMBINING_CCC = /*CCC_BEGIN*/[[768,846],[848,879],[1155,1159],[1425,1469],[1471,1471],[1473,1474],[1476,1477],[1479,1479],[1552,1562],[1611,1631],[1648,1648],[1750,1756],[1759,1764],[1767,1768],[1770,1773],[1809,1809],[1840,1866],[2027,2035],[2045,2045],[2070,2073],[2075,2083],[2085,2087],[2089,2093],[2137,2139],[2200,2207],[2250,2273],[2275,2303],[2364,2364],[2381,2381],[2385,2388],[2492,2492],[2509,2509],[2558,2558],[2620,2620],[2637,2637],[2748,2748],[2765,2765],[2876,2876],[2893,2893],[3021,3021],[3132,3132],[3149,3149],[3157,3158],[3260,3260],[3277,3277],[3387,3388],[3405,3405],[3530,3530],[3640,3642],[3656,3659],[3768,3770],[3784,3787],[3864,3865],[3893,3893],[3895,3895],[3897,3897],[3953,3954],[3956,3956],[3962,3965],[3968,3968],[3970,3972],[3974,3975],[4038,4038],[4151,4151],[4153,4154],[4237,4237],[4957,4959],[5908,5909],[5940,5940],[6098,6098],[6109,6109],[6313,6313],[6457,6459],[6679,6680],[6752,6752],[6773,6780],[6783,6783],[6832,6845],[6847,6862],[6964,6964],[6980,6980],[7019,7027],[7082,7083],[7142,7142],[7154,7155],[7223,7223],[7376,7378],[7380,7392],[7394,7400],[7405,7405],[7412,7412],[7416,7417],[7616,7679],[8400,8412],[8417,8417],[8421,8432],[11503,11505],[11647,11647],[11744,11775],[12330,12335],[12441,12442],[42607,42607],[42612,42621],[42654,42655],[42736,42737],[43014,43014],[43052,43052],[43204,43204],[43232,43249],[43307,43309],[43347,43347],[43443,43443],[43456,43456],[43696,43696],[43698,43700],[43703,43704],[43710,43711],[43713,43713],[43766,43766],[44013,44013],[64286,64286],[65056,65071],[66045,66045],[66272,66272],[66422,66426],[68109,68109],[68111,68111],[68152,68154],[68159,68159],[68325,68326],[68900,68903],[69291,69292],[69373,69375],[69446,69456],[69506,69509],[69702,69702],[69744,69744],[69759,69759],[69817,69818],[69888,69890],[69939,69940],[70003,70003],[70080,70080],[70090,70090],[70197,70198],[70377,70378],[70459,70460],[70477,70477],[70502,70508],[70512,70516],[70722,70722],[70726,70726],[70750,70750],[70850,70851],[71103,71104],[71231,71231],[71350,71351],[71467,71467],[71737,71738],[71997,71998],[72003,72003],[72160,72160],[72244,72244],[72263,72263],[72345,72345],[72767,72767],[73026,73026],[73028,73029],[73111,73111],[73537,73538],[92912,92916],[92976,92982],[94192,94193],[113822,113822],[119141,119145],[119149,119154],[119163,119170],[119173,119179],[119210,119213],[119362,119364],[122880,122886],[122888,122904],[122907,122913],[122915,122916],[122918,122922],[123023,123023],[123184,123190],[123566,123566],[123628,123631],[124140,124143],[125136,125142],[125252,125258]]/*CCC_END*/;
+
+  function ha_ccc(cp) {   // ricerca binaria su intervalli [inizio, fine]
+    let lo = 0, hi = COMBINING_CCC.length - 1;
+    while (lo <= hi) {
+      const mid = (lo + hi) >> 1, r = COMBINING_CCC[mid];
+      if (cp < r[0]) hi = mid - 1; else if (cp > r[1]) lo = mid + 1; else return true;
+    }
+    return false;
+  }
+
+  /**
+   * confronto 'rigoroso' del completamento: NFKD, via i segni diacritici, MAIUSCOLO, spazi compressi,
+   * via la punteggiatura ai margini. NON riconosce sinonimi ne' equivalenze (alfa = greco, sigle).
+   */
+  function normalizza(t) {
+    t = t.normalize('NFKD');
+    let s = '';
+    for (const ch of t) if (!ha_ccc(ch.codePointAt(0))) s += ch;
+    s = s.toUpperCase();
+    s = s.replace(RE_WS_RUN, ' ').replace(RE_WS_EDGE, '');
+    s = s.replace(RE_MARGINE, '');
+    return s;
+  }
+
+  /** chiavi: lista di forme accettate (Q11). Rigorosa = uguaglianza dopo normalizza(); la risposta vuota e' sempre errata. */
+  function corretta_rigorosa(risposta, chiavi) {
+    const r = normalizza(risposta);
+    if (r === '') return false;
+    for (const k of chiavi) if (r === normalizza(k)) return true;
+    return false;
+  }
+
+  return {
+    // costanti
+    SOGLIA, PRIOR_A, PRIOR_B, RIF_MIN, Z95, Z99, SCENARI, LIVELLI, TEMPO_S, NQ, NC, NM,
+    RISERVA_DEFAULT_S, MOLT_SOFT, G_CROC, TEMPO_MAX_S, TESTI_ETICHETTA,
+    // regola d'esame e distribuzioni
+    c_min, bb_pmf, bin_pmf, conv, p_supera, p_supera_gruppi,
+    // raccomandazione
+    quote_attese, composizione_attesa, raccomanda,
+    // intervalli ed etichette
+    wilson, etichetta_unita,
+    // esame
+    esame_indicatori,
+    // tempo
+    budget_s, checkpoint, limite_morbido_s, proiezione, ranghi_mediana, mediana_ic, tronca_tempo, statistiche_tempo,
+    p_non_letti_peggiori, p_non_letti_casuali, giuste_minime_non_letti,
+    // completamento
+    normalizza, corretta_rigorosa
+  };
+});
+</script>
+<script id="logica">/* logica_f4d.js - logica pura dell'app F4d (corso, calcolatore, cronometro, dati): nessun accesso a DOM, rete o storage.
+ * Gira in Node (test) e nel browser (globale LogicaF4d). Usa il motore (motore_f4a.js, NON modificato) per c_min, budget_s, checkpoint, limite_morbido_s.
+ * Non contiene quesiti ne' chiavi.
+ */
+(function (root, factory) {
+  root.LogicaF4d = factory(root.MotoreF4);
+})(typeof self !== 'undefined' ? self : this, function (M) {
+  'use strict';
+
+  const APP = 'triage_f4d';
+  const VERSIONE = 2;                            // BRIEF_F4d_passo2 §4.1 (chiave di salvataggio invariata)
+  const RISERVA_MIN = 0, RISERVA_MAX = 600;      // BRIEF_F4d §4.5
+  const MAX_VOCI = 20000;                        // BRIEF passo2 §4.1: oltre, l'importazione e' rifiutata
+  const MATERIE = ['CHIM', 'FIS', 'BIO'];
+  const NOME_MATERIA = { CHIM: 'Chimica', FIS: 'Fisica', BIO: 'Biologia' };
+  const FORMATI = ['C', 'COMP'];
+  const NOME_FORMATO = { C: 'Crocetta (5 opzioni)', COMP: 'Completamento' };
+  const LIVELLI = ['A', 'M', 'B'];
+  const NOME_LIVELLO = { A: 'Alta', M: 'Media', B: 'Bassa' };
+  const N_UNITA = 7;
+  const SOGLIA = M.SOGLIA, RIF_MIN = M.RIF_MIN;  // 25 e 100 (dal motore)
+  const CAMPI_VOCE = ['id', 'ts', 'data', 'materia', 'formato', 'unita', 'livello', 'esito', 'prima'];
+  const isObj = (x) => x !== null && typeof x === 'object' && !Array.isArray(x);
+
+  // ------------------------------------------------------------------ progresso (localStorage, Esporta/Importa)
+  const validaRiserva = (x) => Number.isInteger(x) && x >= RISERVA_MIN && x <= RISERVA_MAX;
+  const idModuloValido = (s) => typeof s === 'string' && /^[a-z0-9_]{1,20}$/.test(s);
+
+  const sessioneDefault = () => ({ materia: null, formato: 'C', unita: null });
+  function statoVuoto() { return { versione: VERSIONE, letti: [], impostazioni: { riserva: M.RISERVA_DEFAULT_S, sessione: sessioneDefault() }, registro: [] }; }
+
+  /** Data locale AAAA-MM-GG di un oggetto Date. */
+  function dataLocale(d) { const p = (n) => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); }
+  function dataValida(s) {
+    const m = typeof s === 'string' ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(s) : null;
+    if (!m) return false;
+    const y = Number(m[1]), mo = Number(m[2]), g = Number(m[3]), d = new Date(y, mo - 1, g);
+    return d.getFullYear() === y && d.getMonth() === mo - 1 && d.getDate() === g;
+  }
+
+  /** Voce del registro: solo i campi di CAMPI_VOCE, con i vincoli di BRIEF passo2 §4.1. Ritorna null se valida, altrimenti il motivo. */
+  function erroreVoce(v) {
+    if (!isObj(v)) return 'la voce non è un oggetto';
+    const chiavi = Object.keys(v);
+    if (chiavi.length !== CAMPI_VOCE.length || !CAMPI_VOCE.every((c) => chiavi.includes(c))) return 'la voce ha campi mancanti o in più';
+    if (typeof v.id !== 'string' || v.id === '' || v.id.length > 64) return '"id" non valido';
+    if (!Number.isSafeInteger(v.ts) || v.ts < 0) return '"ts" non valido';
+    if (!dataValida(v.data)) return '"data" non valida';
+    if (!MATERIE.includes(v.materia)) return '"materia" non valida';
+    if (!FORMATI.includes(v.formato)) return '"formato" non valido';
+    if (!(v.unita === null || (Number.isInteger(v.unita) && v.unita >= 1 && v.unita <= N_UNITA))) return '"unita" non valida';
+    if (!LIVELLI.includes(v.livello)) return '"livello" non valido';
+    if (!(v.esito === null || v.esito === true || v.esito === false)) return '"esito" non valido';
+    if (typeof v.prima !== 'boolean') return '"prima" non valido';
+    return null;
+  }
+  const copiaVoce = (v) => ({ id: v.id, ts: v.ts, data: v.data, materia: v.materia, formato: v.formato, unita: v.unita, livello: v.livello, esito: v.esito, prima: v.prima });
+
+  /** Registro valido (voci valide, id unici, al massimo MAX_VOCI): ritorna {ok, errore, registro}. */
+  function validaRegistro(r) {
+    if (!Array.isArray(r)) return { ok: false, errore: '"registro" non è un elenco' };
+    if (r.length > MAX_VOCI) return { ok: false, errore: 'il registro ha più di ' + MAX_VOCI + ' voci' };
+    const visti = new Set();
+    for (let i = 0; i < r.length; i++) {
+      const e = erroreVoce(r[i]);
+      if (e) return { ok: false, errore: 'voce ' + (i + 1) + ': ' + e };
+      if (visti.has(r[i].id)) return { ok: false, errore: 'voce ' + (i + 1) + ': "id" duplicato nel file' };
+      visti.add(r[i].id);
+    }
+    return { ok: true, errore: null, registro: r.map(copiaVoce) };
+  }
+
+  function sessioneValida(s) {
+    const x = isObj(s) ? s : {};
+    return { materia: MATERIE.includes(x.materia) ? x.materia : null, formato: FORMATI.includes(x.formato) ? x.formato : 'C',
+      unita: Number.isInteger(x.unita) && x.unita >= 1 && x.unita <= N_UNITA ? x.unita : null };
+  }
+
+  /** Stato letto dal salvataggio: ritorna uno stato valido (versione 2) oppure null. Uno stato versione 1 diventa 2 senza perdere nulla. */
+  function statoDaSalvato(s) {
+    if (!isObj(s) || (s.versione !== 1 && s.versione !== 2) || !Array.isArray(s.letti) || !s.letti.every(idModuloValido)) return null;
+    const imp = isObj(s.impostazioni) ? s.impostazioni : {};
+    let registro = [];
+    if (s.versione === 2) { const v = validaRegistro(s.registro); if (!v.ok) return null; registro = v.registro; }
+    return { versione: VERSIONE, letti: Array.from(new Set(s.letti)).sort(),
+      impostazioni: { riserva: validaRiserva(imp.riserva) ? imp.riserva : M.RISERVA_DEFAULT_S, sessione: s.versione === 2 ? sessioneValida(imp.sessione) : sessioneDefault() },
+      registro };
+  }
+
+  /** La sessione non si esporta (BRIEF passo2 §4.7). */
+  function creaEsportazione(stato, adesso) {
+    return { app: APP, versione: VERSIONE, esportato: adesso, letti: stato.letti.slice(), impostazioni: { riserva: stato.impostazioni.riserva }, registro: stato.registro.map(copiaVoce) };
+  }
+
+  /** Ritorna {ok, errori[], letti, riserva, registro}. Accetta versione 1 (senza registro) e 2; rifiuta l'intero file al primo errore. */
+  function validaProgresso(o) {
+    if (!isObj(o)) return { ok: false, errori: ['il file non è un oggetto JSON'] };
+    if (o.app !== APP) return { ok: false, errori: ['non è un file di progressi di questa app'] };
+    if (o.versione !== 1 && o.versione !== 2) return { ok: false, errori: ['versione dei progressi non supportata'] };
+    if (!Array.isArray(o.letti) || !o.letti.every(idModuloValido)) return { ok: false, errori: ['"letti" non valido'] };
+    if (!isObj(o.impostazioni) || !validaRiserva(o.impostazioni.riserva)) return { ok: false, errori: ['"impostazioni.riserva" non valida (intero 0–600)'] };
+    let registro = [];
+    if (o.versione === 2) {
+      const v = validaRegistro(o.registro);
+      if (!v.ok) return { ok: false, errori: [v.errore] };
+      registro = v.registro;
+    } else if ('registro' in o) return { ok: false, errori: ['un file di versione 1 non può contenere il registro'] };
+    return { ok: true, errori: [], letti: Array.from(new Set(o.letti)), riserva: o.impostazioni.riserva, registro };
+  }
+
+  /**
+   * Unisce: moduli letti = unione; voci del registro per id (a parita' di id vince la voce gia' presente); la riserva e la sessione del dispositivo restano.
+   * Ritorna {stato, aggiunti, gia_presenti, voci_nuove, voci_duplicate}.
+   */
+  function unisci(stato, v) {
+    const set = new Set(stato.letti);
+    let aggiunti = 0, gia = 0;
+    for (const id of v.letti) { if (set.has(id)) gia++; else { set.add(id); aggiunti++; } }
+    const ids = new Set(stato.registro.map((x) => x.id)), registro = stato.registro.map(copiaVoce);
+    let nuove = 0, dup = 0;
+    for (const x of (v.registro || [])) { if (ids.has(x.id)) dup++; else { ids.add(x.id); registro.push(copiaVoce(x)); nuove++; } }
+    return { stato: { versione: VERSIONE, letti: Array.from(set).sort(), impostazioni: { riserva: stato.impostazioni.riserva, sessione: sessioneValida(stato.impostazioni.sessione) }, registro },
+      aggiunti, gia_presenti: gia, voci_nuove: nuove, voci_duplicate: dup };
+  }
+
+  // ------------------------------------------------------------------ registro (BRIEF passo2 §4.2): funzioni pure, restituiscono un NUOVO registro
+  const BASE36 = '0123456789abcdefghijklmnopqrstuvwxyz';
+  function nuovoId(ts, rnd) { let s = ts.toString(36); for (let i = 0; i < 6; i++) s += BASE36[Math.floor((rnd ? rnd() : Math.random()) * 36) % 36]; return s; }
+
+  /**
+   * Passo 1: crea la voce (esito null) con la confidenza scelta. Materia obbligatoria.
+   * sessione = {materia, formato, unita}; prima = true se l'interruttore «Ripasso» e' spento.
+   * Ritorna {ok, errore?, registro, voce}. La confidenza non ha alcuna funzione di modifica.
+   */
+  function registraConfidenza(registro, sessione, livello, prima, adesso, rnd) {
+    if (!sessione || !MATERIE.includes(sessione.materia)) return { ok: false, errore: 'Scegli prima la materia.' };
+    if (!LIVELLI.includes(livello)) return { ok: false, errore: 'Livello di confidenza non valido.' };
+    const ts = adesso.getTime();
+    let id = nuovoId(ts, rnd);
+    const ids = new Set(registro.map((x) => x.id));
+    for (let giri = 1; ids.has(id); giri++) id = nuovoId(ts, rnd) + (giri > 5 ? giri.toString(36) : '');   // collisione: dopo 5 tentativi si aggiunge un contatore
+    const voce = { id, ts, data: dataLocale(adesso), materia: sessione.materia, formato: FORMATI.includes(sessione.formato) ? sessione.formato : 'C',
+      unita: Number.isInteger(sessione.unita) && sessione.unita >= 1 && sessione.unita <= N_UNITA ? sessione.unita : null, livello, esito: null, prima: !!prima };
+    return { ok: true, registro: registro.map(copiaVoce).concat([voce]), voce: copiaVoce(voce) };
+  }
+  /** Passo 2: imposta l'esito di una voce IN SOSPESO. */
+  function impostaEsito(registro, id, esito) {
+    const v = registro.find((x) => x.id === id);
+    if (!v) return { ok: false, errore: 'voce non trovata', registro };
+    if (v.esito !== null) return { ok: false, errore: 'la voce ha già un esito', registro };
+    if (esito !== true && esito !== false) return { ok: false, errore: 'esito non valido', registro };
+    return { ok: true, registro: registro.map((x) => (x.id === id ? Object.assign(copiaVoce(x), { esito }) : copiaVoce(x))) };
+  }
+  /** «Correggi esito»: inverte giusta/sbagliata di una voce gia' valutata. */
+  function correggiEsito(registro, id) {
+    const v = registro.find((x) => x.id === id);
+    if (!v || v.esito === null) return { ok: false, errore: 'voce non valutata', registro };
+    return { ok: true, registro: registro.map((x) => (x.id === id ? Object.assign(copiaVoce(x), { esito: !x.esito }) : copiaVoce(x))) };
+  }
+  function eliminaVoce(registro, id) {
+    if (!registro.some((x) => x.id === id)) return { ok: false, errore: 'voce non trovata', registro };
+    return { ok: true, registro: registro.filter((x) => x.id !== id).map(copiaVoce) };
+  }
+  /** Voci senza esito (qualunque `prima`), dalla piu' recente. */
+  const inSospeso = (registro) => registro.filter((x) => x.esito === null).reverse();
+  /** Ultime n voci valutate, dalla piu' recente. */
+  const ultimeValutate = (registro, n) => registro.filter((x) => x.esito !== null).slice(-n).reverse();
+
+  // ------------------------------------------------------------------ aggregazione (BRIEF passo2 §4.3): interi, nessuna percentuale intermedia
+  /**
+   * Considera SOLO le voci con prima === true e esito !== null. Non modifica il registro.
+   * livelli: {A:[k,n], M:[k,n], B:[k,n]} (tutte le materie e i formati, anche senza unita');
+   * unita: {CHIM:[[k,n] x7], FIS:[…], BIO:[…]} con indice 0 = UD1, SOLO voci con unita' non nulla;
+   * per_materia: n per materia; in_sospeso: voci senza esito (qualunque `prima`); ripassi: voci con prima === false (valutate o no);
+   * totale_prime: prime risposte valutate.
+   */
+  function aggrega_registro(registro) {
+    const livelli = { A: [0, 0], M: [0, 0], B: [0, 0] };
+    const unita = {}, per_materia = {};
+    for (const m of MATERIE) { per_materia[m] = 0; unita[m] = []; for (let u = 0; u < N_UNITA; u++) unita[m].push([0, 0]); }
+    let in_sospeso = 0, ripassi = 0, totale_prime = 0;
+    for (let i = 0; i < registro.length; i++) {
+      const v = registro[i];
+      if (v.esito === null) in_sospeso++;
+      if (v.prima === false) ripassi++;
+      if (v.prima !== true || v.esito === null) continue;
+      totale_prime++;
+      per_materia[v.materia]++;
+      livelli[v.livello][1]++;
+      if (v.esito === true) livelli[v.livello][0]++;
+      if (v.unita !== null) { const c = unita[v.materia][v.unita - 1]; c[1]++; if (v.esito === true) c[0]++; }
+    }
+    return { livelli, unita, per_materia, in_sospeso, ripassi, totale_prime };
+  }
+
+  // ------------------------------------------------------------------ Livelli e Unita' (BRIEF passo2 §4.4, §4.5): testi fissi della Regia
+  /** Percentuale intera piu' vicina (mezzi in su), con soli interi. */
+  const percento = (k, n) => Math.floor((200 * k + n) / (2 * n));
+  /** Wilson 95% del motore, arrotondato VERSO L'ESTERNO (lo = floor, hi = ceil), in punti percentuali interi. */
+  function intervallo95(k, n) {
+    const [lo, hi] = M.wilson(k, n, M.Z95), EPS = 1e-9;
+    return { lo: Math.max(0, Math.floor(lo * 100 + EPS)), hi: Math.min(100, Math.ceil(hi * 100 - EPS)) };
+  }
+
+  function valutaLivelli(agg) {
+    const righe = LIVELLI.map((l) => {
+      const [k, n] = agg.livelli[l], nome = NOME_LIVELLO[l];
+      if (n < SOGLIA) return { livello: l, nome, k, n, sufficiente: false, testo: nome + ': dati insufficienti (' + n + ' su ' + SOGLIA + ' risposte necessarie)' };
+      const p = percento(k, n), iv = intervallo95(k, n);
+      return { livello: l, nome, k, n, sufficiente: true, p, lo: iv.lo, hi: iv.hi, testo: nome + ': ' + p + '% giuste (n = ' + n + '; intervallo 95%: ' + iv.lo + '–' + iv.hi + '%)' };
+    });
+    const tutti = righe.every((r) => r.sufficiente);
+    let inversione = null;
+    if (tutti) {
+      const [A, Mm, B] = righe;
+      const piu = (x, y) => x.k * y.n > y.k * x.n;           // k/n di x > k/n di y, in frazioni
+      inversione = piu(Mm, A) || piu(B, Mm) || piu(B, A);
+    }
+    return { righe, inversione, testo_inversione: inversione ? TESTO_INVERSIONE : null };
+  }
+  const TESTO_INVERSIONE = 'i tuoi livelli di confidenza non sono ancora ordinati: la confidenza non distingue ancora le risposte sicure da quelle incerte';
+
+  /** Per una materia: 7 righe con testo e etichetta del motore (etichetta_unita), riferimento = somma delle ALTRE sei unita'. */
+  function valutaUnita(agg, materia) {
+    const celle = agg.unita[materia];
+    const tot = celle.reduce((a, c) => [a[0] + c[0], a[1] + c[1]], [0, 0]);
+    const righe = celle.map((c, i) => {
+      const k = c[0], n = c[1], k_rif = tot[0] - k, n_rif = tot[1] - n;
+      const et = M.etichetta_unita(k, n, k_rif, n_rif);
+      if (n < SOGLIA) return { unita: i + 1, k, n, k_rif, n_rif, sufficiente: false, codice: et.codice, testo: 'dati insufficienti (n = ' + n + ' su ' + SOGLIA + ')', etichetta: null };
+      const p = percento(k, n), iv = intervallo95(k, n);
+      return { unita: i + 1, k, n, k_rif, n_rif, sufficiente: true, p, lo: iv.lo, hi: iv.hi, codice: et.codice,
+        testo: k + '/' + n + ' = ' + p + '% (intervallo 95%: ' + iv.lo + '–' + iv.hi + '%)', etichetta: et.testo };
+    });
+    return { materia, righe };
+  }
+  /** Riga sotto la tabella di ogni unita' (BRIEF passo2 §4.5): riferimento = altre unita' della stessa materia. */
+  function testoRiferimento(n_rif) {
+    return 'Riferimento (altre unità): ' + n_rif + ' risposte' + (n_rif < RIF_MIN ? '. Etichette disattivate: servono almeno ' + RIF_MIN + ' risposte nelle altre unità.' : '');
+  }
+
+  /** Titoli delle unita' da UNITA_F4d.md: righe «MATERIA | numero | titolo». Ritorna {titoli:{CHIM:[7],…}|null, avvisi[], errori[]}. */
+  function parseUnita(testo) {
+    const avvisi = [], errori = [];
+    const t = String(testo || '').replace(/\r\n?/g, '\n');
+    const titoli = { CHIM: new Array(N_UNITA).fill(null), FIS: new Array(N_UNITA).fill(null), BIO: new Array(N_UNITA).fill(null) };
+    let trovate = 0;
+    for (const riga of t.split('\n')) {
+      const r = riga.trim();
+      if (!/^(CHIM|FIS|BIO)(?![A-Za-z])/.test(r)) continue;
+      const p = r.split('|').map((x) => x.trim());
+      if (p.length < 3 || !MATERIE.includes(p[0]) || !/^[1-7]$/.test(p[1]) || p.slice(2).join('|').trim() === '') { errori.push('UNITA: riga non valida (atteso «MATERIA | 1…7 | titolo»): «' + r.slice(0, 50) + '»'); continue; }
+      const u = Number(p[1]) - 1;
+      if (titoli[p[0]][u] !== null) { errori.push('UNITA: ' + p[0] + ' unità ' + p[1] + ' presente due volte'); continue; }
+      titoli[p[0]][u] = p.slice(2).join('|').trim();
+      trovate++;
+    }
+    if (t.trim() === '') { avvisi.push('UNITA_F4d.md mancante: le unità saranno mostrate come UD1…UD7 senza titolo'); return { titoli: null, avvisi, errori }; }
+    for (const m of MATERIE) { const n = titoli[m].filter((x) => x !== null).length; if (n !== N_UNITA) errori.push('UNITA: ' + m + ' ha ' + n + ' unità invece di ' + N_UNITA); }
+    return { titoli: errori.length ? null : titoli, avvisi, errori };
+  }
+  /** «UD3 – titolo» oppure «UD3» se i titoli mancano. */
+  function nomeUnita(titoli, materia, u) { return 'UD' + u + (titoli && titoli[materia][u - 1] ? ' – ' + titoli[materia][u - 1] : ''); }
+
+  // ------------------------------------------------------------------ calcolatore (BRIEF §4.4) - tutto con interi
+  /** Testo del campo -> {stato: 'vuoto'|'ok'|'errore', valore}. Solo cifre decimali (nessun segno, virgola o punto). */
+  function leggiIntero(s) {
+    const t = String(s).trim();
+    if (t === '') return { stato: 'vuoto', valore: null };
+    if (!/^\d{1,6}$/.test(t)) return { stato: 'errore', valore: null };
+    return { stato: 'ok', valore: Number(t) };
+  }
+
+  /** decimi di punto (10C - E) -> «18,0», «-0,1» */
+  function formatDecimi(d) {
+    const a = Math.abs(d);
+    return (d < 0 ? '-' : '') + Math.floor(a / 10) + ',' + (a % 10);
+  }
+
+  /** Un esame: C giuste, E errate (interi >= 0, C + E <= 31). S = (10C - E)/10 si supera con 10C - E >= 180 (DM 941 art. 8 c.1 e c.3). */
+  function calcola(C, E) {
+    if (!Number.isInteger(C) || !Number.isInteger(E) || C < 0 || E < 0) return { ok: false, errore: 'Giuste ed errate devono essere numeri interi, 0 o più.' };
+    if (C + E > M.NQ) return { ok: false, errore: 'Giuste + errate = ' + (C + E) + ': non può superare ' + M.NQ + '.' };
+    const A = C + E, decimi = 10 * C - E, cm = M.c_min(A);
+    const raggiungibile = cm <= A;
+    return { ok: true, C, E, A, omesse: M.NQ - A, decimi, punteggio: formatDecimi(decimi), superato: decimi >= 180,
+      raggiungibile, cmin: raggiungibile ? cm : null, ammessi: raggiungibile ? A - cm : null };
+  }
+
+  /** Tabella fissa A = 18..31 dal motore. */
+  function tabellaCmin() {
+    const t = [];
+    for (let A = 18; A <= M.NQ; A++) { const c = M.c_min(A); t.push({ A, cmin: c, ammessi: A - c }); }
+    return t;
+  }
+
+  const MATERIE_ESAME = ['Chimica e propedeutica biochimica', 'Fisica', 'Biologia'];   // DM 941 art. 6 c.2
+  const BONUS_SEZIONE = { 0: 0, 1: 100, 2: 200, 3: 300 };                              // DM 941 art. 10
+  const TESTO_SUPERATI = { 0: 'nessuno superato', 1: '1 su 3 superati', 2: '2 su 3 superati', 3: '3 su 3 superati' };
+
+  /** coppie = [{C, E}, {C, E}, {C, E}] (numeri interi gia' letti). Nessun punteggio totale. */
+  function esameCompleto(coppie) {
+    if (!Array.isArray(coppie) || coppie.length !== 3) return { ok: false, errore: 'Servono tre coppie di valori.' };
+    const sezioni = [];
+    for (let i = 0; i < 3; i++) {
+      const r = calcola(coppie[i].C, coppie[i].E);
+      if (!r.ok) return { ok: false, errore: MATERIE_ESAME[i] + ': ' + r.errore };
+      sezioni.push(Object.assign({ nome: MATERIE_ESAME[i] }, r));
+    }
+    const superati = sezioni.filter((s) => s.superato).length;
+    return { ok: true, sezioni, superati, testo: TESTO_SUPERATI[superati], bonus: BONUS_SEZIONE[superati] };
+  }
+
+  // ------------------------------------------------------------------ cronometro (BRIEF §4.5)
+  const CHECKPOINT_MIN = [10, 20, 30, 40];
+  const fmt2 = (x) => x.toFixed(2).replace('.', ',');
+
+  function parametriCrono(riserva) {
+    return { riserva, budget_s: M.budget_s(riserva), limite_s: M.limite_morbido_s(riserva),
+      checkpoint: CHECKPOINT_MIN.map((m) => ({ minuti: m, obiettivo: M.checkpoint(m, riserva) })) };
+  }
+
+  function mmss(s) {
+    const t = Math.max(0, Math.ceil(s)), m = Math.floor(t / 60), x = t % 60;
+    return String(m).padStart(2, '0') + ':' + String(x).padStart(2, '0');
+  }
+
+  /** Stato del cronometro dato il tempo trascorso (calcolato dai timestamp), la riserva e i quesiti affrontati. */
+  function statoCrono(trascorso_s, riserva, affrontati) {
+    const t = Math.max(0, trascorso_s);
+    const rimanente = Math.max(0, M.TEMPO_S - t);
+    const finito = t >= M.TEMPO_S;
+    const inRiserva = !finito && riserva > 0 && rimanente <= riserva;
+    const passati = CHECKPOINT_MIN.filter((m) => t >= m * 60);
+    const ultimo = passati.length ? passati[passati.length - 1] : null;
+    let box = null;
+    if (ultimo !== null) {
+      const ob = M.checkpoint(ultimo, riserva), diff = affrontati - ob;
+      box = { minuti: ultimo, obiettivo: ob, diff, posizione: diff > 0 ? 'avanti' : diff < 0 ? 'indietro' : 'in linea',
+        testo: 'Minuto ' + ultimo + ': obiettivo ≈ ' + ob + ' quesiti affrontati. ' + (diff > 0 ? 'Sei avanti di ' + diff : diff < 0 ? 'Sei indietro di ' + (-diff) : 'Sei in linea') + '.' };
+    }
+    const prossimo = CHECKPOINT_MIN.find((m) => t < m * 60);
+    return { trascorso_s: t, rimanente_s: rimanente, finito, inRiserva, checkpointPassati: passati, box,
+      prossimo: prossimo === undefined ? null : { minuti: prossimo, obiettivo: M.checkpoint(prossimo, riserva) } };
+  }
+
+  // ------------------------------------------------------------------ contenuti del corso (BRIEF §5.3)
+  const ETICHETTE = ['NON VERIFICATO', 'CONOSCENZA GENERALE', 'CERTO', 'CALCOLO', 'EURISTICA', 'STIMA'];
+  const CLASSE_ETICHETTA = { 'NON VERIFICATO': 'nv', 'CONOSCENZA GENERALE': 'cg', CERTO: 'certo', CALCOLO: 'calc', EURISTICA: 'eur', STIMA: 'stima' };
+  const SEZIONI_MODULO = ['Regola', 'Perché vale', 'Dove smette di funzionare', 'Verifica'];
+  const SEGNAPOSTO = 'SEGNAPOSTO – non è contenuto del corso';
+  const RE_CAPS = /^[A-ZÀ-Ý]{3,}(?: [A-ZÀ-Ý]{3,})*(?=$|[\s–—,:;-])/;
+
+  function tipoEtichetta(c) {
+    for (const e of ETICHETTE) if (c === e || (c.startsWith(e) && /^[\s–—,:;-]/.test(c.slice(e.length)))) return e;
+    return null;
+  }
+
+  // Etichette composte (BRIEF passo2 §4.9.2): un badge per ciascun nome noto in maiuscolo, nell'ordine di apparizione, seguiti dal testo.
+  // (niente lookbehind: Safari < 16.4 non lo supporta)
+  const RE_NOMI = new RegExp('(^|[^A-Za-zÀ-ÿ])(' + ETICHETTE.join('|') + ')(?![A-Za-zÀ-ÿ])', 'g');
+  /** {nomi: [{tipo, classe}…], residuo} — nomi in ordine di apparizione; residuo = testo senza i nomi, senza separatori ai bordi. */
+  function nomiNoti(c) {
+    const nomi = []; let m;
+    RE_NOMI.lastIndex = 0;
+    while ((m = RE_NOMI.exec(c)) !== null) nomi.push({ tipo: m[2], classe: CLASSE_ETICHETTA[m[2]] });
+    const residuo = c.replace(RE_NOMI, (x, pre) => pre).replace(/([;:,–—-])[\s;:,–—-]*[;:,–—-]/g, '$1').replace(/\s{2,}/g, ' ').replace(/^[\s–—,:;-]+|[\s–—,:;-]+$/g, '');
+    return { nomi, residuo };
+  }
+  function parseEnfasi(seg) {
+    const out = [];
+    for (const p of seg.split(/(\*\*[^*]+\*\*|\*[^*\s][^*]*\*)/)) {
+      if (p === '') continue;
+      if (p.length > 4 && p.startsWith('**') && p.endsWith('**')) out.push({ t: 'b', testo: p.slice(2, -2) });
+      else if (p.length > 2 && p.startsWith('*') && p.endsWith('*') && !p.startsWith('**')) out.push({ t: 'i', testo: p.slice(1, -1) });
+      else out.push({ t: 'txt', testo: p });
+    }
+    return out;
+  }
+
+  /** Testo -> lista di pezzi {t:'txt'|'b'|'i'|'et', testo, tipo?, classe?}. Etichette sconosciute: testo normale + avviso. */
+  function parseInline(testo, avvisi) {
+    const out = [];
+    const re = /\[([^\[\]]{1,300})\]/g;
+    let da = 0, m;
+    while ((m = re.exec(testo)) !== null) {
+      const tipo = tipoEtichetta(m[1]);
+      if (!tipo && !RE_CAPS.test(m[1])) continue;            // parentesi quadre qualunque: restano testo
+      if (m.index > da) out.push(...parseEnfasi(testo.slice(da, m.index)));
+      if (tipo) out.push(Object.assign({ t: 'et', testo: m[1], tipo, classe: CLASSE_ETICHETTA[tipo] }, nomiNoti(m[1])));
+      else { if (avvisi) avvisi.push('etichetta sconosciuta «[' + m[1] + ']» (mostrata come testo normale)'); out.push({ t: 'txt', testo: m[0] }); }
+      da = m.index + m[0].length;
+    }
+    if (da < testo.length) out.push(...parseEnfasi(testo.slice(da)));
+    return out;
+  }
+
+  const spezzaRiga = (r) => { const c = r.trim().replace(/^\|/, '').replace(/\|$/, '').split('|').map((x) => x.trim()); return c; };
+  const RE_SEPARATORE = /^\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/;
+
+  /** Righe di una sezione -> blocchi {t:'p'|'ul'|'tab'} con testo gia' scomposto in pezzi. */
+  function parseBlocchi(righe, avvisi) {
+    const blocchi = [];
+    let par = [], lista = null, tab = null;
+    const chiudiPar = () => { if (par.length) { blocchi.push({ t: 'p', tok: parseInline(par.join(' '), avvisi) }); par = []; } };
+    const chiudiLista = () => { if (lista) { blocchi.push({ t: 'ul', voci: lista.map((v) => parseInline(v, avvisi)) }); lista = null; } };
+    const chiudiTab = () => {
+      if (!tab) return;
+      let intest = null, corpo = tab;
+      if (tab.length >= 2 && RE_SEPARATORE.test(tab[1])) { intest = spezzaRiga(tab[0]); corpo = tab.slice(2); }
+      blocchi.push({ t: 'tab', intest: intest && intest.map((c) => parseInline(c, avvisi)), righe: corpo.filter((r) => !RE_SEPARATORE.test(r)).map((r) => spezzaRiga(r).map((c) => parseInline(c, avvisi))) });
+      tab = null;
+    };
+    const chiudiTutto = () => { chiudiPar(); chiudiLista(); chiudiTab(); };
+    for (const grezza of righe) {
+      if (/<\/?[a-z][^>]*>/i.test(grezza)) avvisi.push('possibile HTML nel testo (verrà mostrato come testo): «' + grezza.trim().slice(0, 40) + '…»');
+      const r = grezza.replace(/\s+$/, '');
+      if (r.trim() === '') { chiudiTutto(); continue; }
+      if (/^#{3,}\s/.test(r)) { avvisi.push('intestazione di livello 3 o più non supportata: «' + r.trim().slice(0, 40) + '»'); chiudiTutto(); par.push(r.replace(/^#+\s*/, '')); continue; }
+      if (/^- /.test(r)) { chiudiPar(); chiudiTab(); if (!lista) lista = []; lista.push(r.slice(2).trim()); continue; }
+      if (/^\s+\S/.test(r) && lista) { lista[lista.length - 1] += ' ' + r.trim(); continue; }
+      if (/^\s*\|/.test(r)) { chiudiPar(); chiudiLista(); if (!tab) tab = []; tab.push(r.trim()); continue; }
+      chiudiLista(); chiudiTab(); par.push(r.trim());
+    }
+    chiudiTutto();
+    return blocchi;
+  }
+
+  /** Divide le righe in sezioni `## `: ritorna {pre: righe prima della prima sezione, sezioni: [{titolo, righe}]}. */
+  function dividiSezioni(righe) {
+    const pre = [], sezioni = [];
+    for (const r of righe) {
+      const m = /^##\s+(.+?)\s*$/.exec(r);
+      if (m) sezioni.push({ titolo: m[1], righe: [] });
+      else if (sezioni.length) sezioni[sezioni.length - 1].righe.push(r);
+      else pre.push(r);
+    }
+    return { pre, sezioni };
+  }
+
+  const RE_VERIFICA = /^-\s*([VF])\s*\|\s*(.+?)\s*\|\s*(.+)$/;
+
+  /**
+   * Legge CONTENUTI_F4d.md. Ritorna {revisione, segnaposto, moduli[], guida|null, avvisi[], errori[]}.
+   * errori = il build si ferma (sezione mancante o duplicata, Verifica non valida, modulo duplicato, file senza moduli);
+   * avvisi = il build continua (etichetta sconosciuta, HTML, testo fuori sezione, revisione o durata mancanti, moduli attesi 0-5 mancanti).
+   */
+  function parseContenuti(testo) {
+    const avvisi = [], errori = [];
+    const righe = String(testo).replace(/\r\n?/g, '\n').split('\n');
+    const intest = [];
+    righe.forEach((r, i) => { const m = /^#\s+(.*)$/.exec(r); if (m) intest.push({ i, titolo: m[1].trim() }); });
+    const elementi = [];
+    let primo = intest.findIndex((x) => /^Modulo\s+\d+\s*[–—-]\s*\S/.test(x.titolo) || /^Guida d['’]uso\s*$/i.test(x.titolo));
+    if (primo < 0) primo = intest.length;
+    // revisione: nella parte prima del primo modulo/guida
+    const finePre = primo < intest.length ? intest[primo].i : righe.length;
+    const mr = /(?:^|[\s:])v(\d+)\b/i.exec(righe.slice(0, finePre).join('\n'));
+    const revisione = mr ? 'v' + mr[1] : null;
+    if (!revisione) avvisi.push('revisione (v<n>) non trovata in testa al file');
+    intest.forEach((x, k) => {
+      const fine = k + 1 < intest.length ? intest[k + 1].i : righe.length;
+      const mm = /^Modulo\s+(\d+)\s*[–—-]\s*(.+)$/.exec(x.titolo);
+      if (mm) elementi.push({ tipo: 'modulo', n: Number(mm[1]), titolo: mm[2].trim(), righe: righe.slice(x.i + 1, fine), nome: 'Modulo ' + mm[1] });
+      else if (/^Guida d['’]uso\s*$/i.test(x.titolo)) elementi.push({ tipo: 'guida', titolo: "Guida d'uso", righe: righe.slice(x.i + 1, fine), nome: "Guida d'uso" });
+      else if (k >= primo) avvisi.push('intestazione «# ' + x.titolo + '» ignorata (non è un modulo né la guida)');
+    });
+
+    const moduli = [];
+    let guida = null;
+    const visti = new Set();
+    for (const el of elementi) {
+      const { pre, sezioni } = dividiSezioni(el.righe);
+      let lettura = null;
+      for (const r of pre) {
+        if (r.trim() === '') continue;
+        const ml = /^Lettura:\s*(\d+)\s*minut/i.exec(r.trim());
+        if (ml && lettura === null) lettura = Number(ml[1]);
+        else avvisi.push(el.nome + ': testo fuori da una sezione, ignorato: «' + r.trim().slice(0, 40) + '»');
+      }
+      const titoli = sezioni.map((s) => s.titolo);
+      const dup = titoli.find((t, i) => titoli.indexOf(t) !== i);
+      if (dup) errori.push(el.nome + ': sezione «' + dup + '» ripetuta');
+      if (el.tipo === 'modulo') {
+        if (visti.has(el.n)) { errori.push('Modulo ' + el.n + ' presente due volte'); continue; }
+        visti.add(el.n);
+        if (lettura === null) avvisi.push(el.nome + ': manca la riga «Lettura: N minuti»');
+        for (const s of SEZIONI_MODULO) if (!titoli.includes(s)) errori.push(el.nome + ': manca la sezione «' + s + '»');
+        const sez = [];
+        let verifica = [];
+        for (const s of sezioni) {
+          if (s.titolo === 'Verifica') {
+            for (const r of s.righe) {
+              if (r.trim() === '') continue;
+              const v = RE_VERIFICA.exec(r.trim());
+              if (!v) { errori.push(el.nome + ', Verifica: riga non valida (atteso «- V | affermazione | spiegazione»): «' + r.trim().slice(0, 50) + '»'); continue; }
+              verifica.push({ vero: v[1] === 'V', affermazione: parseInline(v[2], avvisi.length >= 0 ? avvisi : null), spiegazione: parseInline(v[3], avvisi) });
+            }
+            if (verifica.length === 0 && titoli.includes('Verifica')) errori.push(el.nome + ': la Verifica non contiene affermazioni valide');
+          } else {
+            const a = []; const blocchi = parseBlocchi(s.righe, a);
+            a.forEach((x) => avvisi.push(el.nome + ', «' + s.titolo + '»: ' + x));
+            if (blocchi.length === 0) avvisi.push(el.nome + ': la sezione «' + s.titolo + '» è vuota');
+            sez.push({ titolo: s.titolo, blocchi });
+          }
+        }
+        moduli.push({ id: 'm' + el.n, n: el.n, titolo: el.titolo, lettura, sezioni: sez, verifica });
+      } else {
+        if (guida) { errori.push("Guida d'uso presente due volte"); continue; }
+        if (sezioni.length === 0) errori.push("Guida d'uso: nessuna sezione «## …»");
+        const sez = sezioni.map((s) => { const a = []; const blocchi = parseBlocchi(s.righe, a); a.forEach((x) => avvisi.push("Guida d'uso, «" + s.titolo + '»: ' + x)); return { titolo: s.titolo, blocchi }; });
+        guida = { id: 'guida', titolo: el.titolo, lettura, sezioni: sez };
+      }
+    }
+    moduli.sort((a, b) => a.n - b.n);
+    if (moduli.length === 0 && !guida) errori.push('il file non contiene alcun modulo né la guida');
+    const attesi = [0, 1, 2, 3, 4, 5].filter((n) => !visti.has(n));
+    if (moduli.length && attesi.length) avvisi.push('moduli attesi 0–5 non presenti: ' + attesi.join(', '));
+    return { revisione, segnaposto: String(testo).includes(SEGNAPOSTO), moduli, guida, avvisi, errori };
+  }
+
+  return {
+    APP, VERSIONE, RISERVA_MIN, RISERVA_MAX, SEGNAPOSTO, SEZIONI_MODULO, ETICHETTE, MATERIE_ESAME,
+    MATERIE, NOME_MATERIA, FORMATI, NOME_FORMATO, LIVELLI, NOME_LIVELLO, N_UNITA, MAX_VOCI, SOGLIA, RIF_MIN,
+    validaRiserva, statoVuoto, statoDaSalvato, creaEsportazione, validaProgresso, unisci, dataLocale, erroreVoce, validaRegistro,
+    registraConfidenza, impostaEsito, correggiEsito, eliminaVoce, inSospeso, ultimeValutate, aggrega_registro,
+    percento, intervallo95, valutaLivelli, valutaUnita, testoRiferimento, parseUnita, nomeUnita,
+    leggiIntero, formatDecimi, calcola, tabellaCmin, esameCompleto,
+    CHECKPOINT_MIN, fmt2, parametriCrono, mmss, statoCrono,
+    parseInline, parseBlocchi, parseContenuti
+  };
+});
+</script>
+<script id="contenuti" type="text/plain">Revisione: v2 – 27/10/2026 (v1 → v2: solo la sezione «Come usare il Registro» della Guida, riallineata all'app del passo 2)
+Allineamento: STATO R8, SPEC v1, BRIEF_F4d v1 + passo2 v1, PROTOCOLLO v2, CLAUDE.md v2.
+Fonti delle regole: DM 941 del 10/7/2026 (20 pagine) e Allegato 2 (7 pagine). Dove una riga cita «SEU» la fonte è il sito ufficiale del semestre filtro, non il decreto.
+
+# Modulo 0 – Le regole del gioco
+Lettura: 4 minuti
+
+## Regola
+**La prova (per ciascuna delle tre materie)**
+- Tre insegnamenti da 6 CFU: Chimica e propedeutica biochimica, Fisica, Biologia [CERTO – DM 941 art. 6 c.2, p. 9].
+- 31 domande per prova: 21 a risposta multipla (5 opzioni, una sola corretta) e 10 a completamento [CERTO – DM 941 art. 7 c.4, p. 10; Allegato 2 punto 4, p. 1].
+- 50 minuti per ciascuna prova [CERTO – DM 941 art. 7 c.3, p. 10].
+- Le prove hanno contenuto identico in tutte le sedi e seguono i Syllabus 2026 [CERTO – Allegato 2 punto 3, p. 1; DM 941 art. 13 c.2, p. 17].
+- Le prove saranno estratte da un set di domande validato, con risposte ritenute corrette [CERTO – DM 941, premesse, pp. 4–5]. Un set pubblico di quelle domande non risulta disponibile [NON VERIFICATO].
+
+**Il punteggio**
+- +1 per ogni risposta esatta, 0 per ogni omessa, −0,1 per ogni errata [CERTO – DM 941 art. 8 c.1, p. 11].
+- Il testo non distingue tra crocette e completamento. Come venga giudicata «errata» una risposta a completamento non è scritto [NON VERIFICATO].
+- Massimo 93 punti per i tre esami [CERTO – art. 8 c.2, p. 11], cioè 31 per esame [CALCOLO: 93 / 3].
+- L'esame è superato con almeno 18/30. L'arrotondamento all'unità più vicina è previsto solo per chi ha già ottenuto almeno 18/30, quindi 17,9 non diventa 18 [CERTO – art. 8 c.3, p. 11].
+
+**Due prove, un voto per insegnamento**
+- Devi sostenere almeno una delle due prove di ciascun insegnamento [CERTO – art. 7 c.2, p. 10].
+- Se sostieni entrambe le prove di un insegnamento, prevale la più alta, purché sia almeno 18/30 [CERTO – art. 8 c.4, p. 11; Allegato 2 punto 23, p. 7].
+- Dopo gli esiti dovrai accettare o rifiutare ogni voto da 18 in su; vedi il Modulo 5.
+
+**Altre regole che contano**
+- Puoi sostenere gli esami solo se hai rispettato gli obblighi di frequenza [CERTO – Allegato 2 punto 2, p. 1; DM 941 art. 6 c.4, p. 10].
+- Puoi iscriverti al semestre filtro al massimo tre volte [CERTO – art. 16 c.1, p. 18].
+- Avvisi e notizie nella tua area personale di Universitaly hanno valore di notifica; consultarla è un tuo onere [CERTO – art. 19 c.2, pp. 19–20].
+
+**Calendario**
+- Appelli: 10/12/2026 e 11/01/2027 (dalle ore 11:00). Esiti: 23/12/2026 e 20/01/2027 [CERTO – fonte SEU]. Il DM rinvia le date a un provvedimento successivo [CERTO – art. 7 c.2, p. 10]. Controlla sempre la convocazione della tua università.
+
+## Perché vale
+Ogni calcolo e ogni consiglio dei moduli seguenti parte da queste regole: un numero sbagliato (penalità, numero di opzioni, soglia) cambierebbe le conclusioni. Il Calcolatore dell'app usa solo queste regole.
+
+L'app non promette punti. L'effetto dell'app sul risultato d'esame non è stato misurato [NON VERIFICATO], e un pilota con pochi amici e nessun gruppo di confronto non potrà dimostrarlo.
+
+## Dove smette di funzionare
+- Le regole valgono per l'anno accademico 2026/27. I decreti dell'anno precedente hanno cessato efficacia [CERTO – art. 19 c.3, p. 20]: i materiali costruiti su regole precedenti possono avere formato, tempi e penalità diversi da questa prova.
+- Nei testi letti NON ci sono: il criterio di correzione del completamento (sinonimi, ortografia, limite di caratteri); se una domanda con due segni valga come omessa o come errata (il testo dice solo che senza una sola X non può essere attribuito il punteggio); il trattamento di una domanda né risposta né barrata; l'ordine delle tre materie; la possibilità di scrivere sul foglio con le domande; la durata delle operazioni d'aula; il documento di identità richiesto [NON VERIFICATO].
+- Un provvedimento successivo può precisare date e modalità: l'app non lo conosce.
+
+## Verifica
+- V | Ogni prova ha 31 domande: 21 a risposta multipla e 10 a completamento | Art. 7 c.4 del DM 941 e Allegato 2 punto 4.
+- F | Le domande a risposta multipla hanno quattro opzioni | Hanno cinque opzioni, una sola corretta (Allegato 2 punto 4).
+- F | Una risposta errata toglie 0,25 punti | Toglie 0,1 punti (art. 8 c.1).
+- V | Se sostieni entrambe le prove di un insegnamento, vale la più alta purché sia almeno 18/30 | Art. 8 c.4 e Allegato 2 punto 23.
+- F | Un punteggio di 17,9 viene arrotondato a 18 e supera l'esame | L'arrotondamento è previsto solo dopo aver ottenuto almeno 18/30 (art. 8 c.3).
+- V | Nei testi ufficiali letti non è indicato l'ordine delle tre materie | Né il DM 941 né l'Allegato 2 lo indicano: non darlo per scontato.
+
+# Modulo 1 – Crocette
+Lettura: 5 minuti
+
+## Regola
+**Come si compila**
+- Segno X in UNA casella. Puoi correggere una sola volta: annerisci completamente la casella precedente e segna un'altra [CERTO – Allegato 2 punto 16, pp. 4–5].
+- Perché il punteggio sia attribuito deve risultare una X in una sola delle cinque caselle [CERTO – Allegato 2 punto 16, p. 5].
+- Per dichiarare con certezza che non rispondi si barra il cerchietto accanto al numero della domanda; una volta barrato non è più modificabile [CERTO – Allegato 2 punto 16, p. 5].
+- Penna nera in dotazione, esclusivamente quella [CERTO – Allegato 2 punto 16, p. 4].
+
+**Quanto vale rispondere**
+- Con p = probabilità che la tua risposta sia giusta, il valore atteso è 1,1·p − 0,1 punti [CALCOLO: p·(+1) + (1 − p)·(−0,1)].
+- Il pareggio è p = 1/11, cioè circa 9,1% [CALCOLO].
+- Scegliere a caso tra 5 opzioni dà p = 20% e un valore atteso di +0,12 punti rispetto a omettere [CALCOLO].
+- Esempio: 5 crocette lasciate in bianco, se invece risposte a caso, valgono in media +0,6 punti per esame (5 × 0,12) [CALCOLO]. È una media: in un singolo esame il risultato può essere migliore o peggiore, e non è una promessa di punti.
+
+| Opzioni scartate (correttamente) | Probabilità scegliendo a caso tra le rimaste | Valore atteso |
+|---|---|---|
+| 0 | 20,0% | +0,120 |
+| 1 | 25,0% | +0,175 |
+| 2 | 33,3% | +0,267 |
+| 3 | 50,0% | +0,450 |
+
+Valori calcolati con la formula 1,1·p − 0,1, nel caso in cui l'opzione giusta sia tra quelle rimaste [CALCOLO].
+
+**Eliminazione**
+- Scartare opzioni serve ad alzare p, non a decidere se rispondere: già a p = 20% rispondere conviene in valore atteso [EURISTICA].
+- Omettere ha senso, in valore atteso, solo se stimi p sotto il 9,1% [CALCOLO]. Con 5 opzioni significa credere di essere peggio del caso: succede se sospetti che l'opzione che ti attrae sia proprio una trappola [EURISTICA].
+
+**Suggerimenti non validati**
+- Controllo dimensionale: se le opzioni sono numeri con unità o ordini di grandezza diversi, verifica quali sono compatibili con ciò che la domanda chiede, prima di fare tutto il calcolo [EURISTICA].
+- Sostituzione: se le opzioni sono valori da inserire in un'espressione, provarne alcune può essere più rapido che ricavare il risultato [EURISTICA].
+- Segnali testuali nelle opzioni (parole assolute, opzione molto più lunga): è un'ipotesi non validata e non raccomandata. Usala al massimo per scegliere tra opzioni che già ritieni plausibili, mai al posto del ragionamento [EURISTICA].
+
+**Trasferire le risposte**
+- I fogli con le domande restano all'università; al CINECA vanno i moduli risposte per la rilevazione informatizzata [CERTO – Allegato 2 punti 17–18, pp. 5–6]. Quindi conta ciò che è scritto sul modulo risposte.
+- Hai una sola correzione per domanda: segna sul modulo solo ciò che hai deciso. Per le ipotesi provvisorie usa i fogli di brutta copia, che sono due per plico [CERTO – Allegato 2 punto 14, p. 4] [EURISTICA].
+
+## Perché vale
+Con +1 / 0 / −0,1 e cinque opzioni, la penalità è piccola rispetto al premio: lasciare in bianco una domanda su cui hai anche solo un'idea costa in media punti. Il resto della strategia (tempo, soglia) si costruisce su questa aritmetica.
+
+## Dove smette di funzionare
+- Il valore atteso non è l'obiettivo reale: l'obiettivo è arrivare ad almeno 18 in tutte e tre le materie. Vicino alla soglia il conteggio dei punti attesi non basta; vedi il Modulo 5 [CALCOLO].
+- La tua p è una credenza, non un dato. Una eliminazione sbagliata (hai scartato l'opzione giusta) porta p a zero per quella domanda.
+- I suggerimenti sono stati pensati per materiale editoriale; non sono validati sulla prova nazionale e il campione disponibile è piccolo (fino a 90 crocette con chiave, incertezza di circa ±10 punti percentuali) [NON VERIFICATO].
+- Se una domanda con due segni non ha punteggio perché è considerata omessa (0) o errata (−0,1) non è scritto [NON VERIFICATO].
+
+## Verifica
+- V | Rispondere a caso a una crocetta con 5 opzioni ha valore atteso +0,12 punti | 0,2 × 1 − 0,8 × 0,1 = 0,12.
+- F | Omettere una crocetta toglie 0,1 punti | Un'omessa vale 0 punti; −0,1 è la penalità delle risposte errate.
+- V | Con p = 5% rispondere ha valore atteso negativo | 1,1 × 0,05 − 0,1 = −0,045.
+- F | Se segni due caselle con la X senza annerire la precedente, il punteggio viene comunque attribuito | Deve risultare una X in una sola delle cinque caselle (Allegato 2 punto 16).
+- V | Dopo aver scartato correttamente 2 opzioni, scegliere a caso tra le 3 rimaste dà p = 1/3 | Il valore atteso diventa circa +0,27 punti.
+- F | Il cerchietto accanto al numero si può cancellare se cambi idea | Una volta barrato non è più modificabile (Allegato 2 punto 16).
+
+# Modulo 2 – Completamento
+Lettura: 4 minuti
+
+## Regola
+**Che cosa chiede la domanda**
+- Devi inserire «la risposta corretta mancante, espressiva di un solo e univoco concetto» [CERTO – Allegato 2 punto 4, p. 1].
+- Non ci sono opzioni da cui scegliere.
+
+**Come si compila**
+- Scrivi la risposta nell'apposito spazio, in STAMPATELLO MAIUSCOLO [CERTO – Allegato 2 punto 16, p. 5].
+- Puoi correggere una sola volta: scrivi una diversa risposta nello spazio sottostante e annerisci completamente la precedente [CERTO – Allegato 2 punto 16, p. 5].
+- Il cerchietto «non rispondo» è irreversibile, come per le crocette [CERTO – Allegato 2 punto 16, p. 5].
+
+**Punteggio**
+- +1 / 0 / −0,1 come per ogni risposta [CERTO – DM 941 art. 8 c.1, p. 11]. Il testo non distingue il formato [NON VERIFICATO sul trattamento della risposta errata a completamento].
+- La somma dei punteggi delle crocette e del completamento dà il punteggio d'esame [CERTO – Allegato 2 punto 18, p. 6].
+
+**Che cosa NON sappiamo**
+- Il criterio di correzione: se sinonimi, plurali, sigle, errori di ortografia o forme diverse dello stesso termine siano accettati; se esista un limite di caratteri [NON VERIFICATO]. Il limite di 16 caratteri citato nei commenti di un editore non compare nell'Allegato 2 [NON VERIFICATO].
+- Il tempo che richiede questo formato rispetto alle crocette [NON VERIFICATO].
+
+**Suggerimenti**
+- Rispondi se riesci a richiamare un candidato concreto con una probabilità di aver ragione di almeno il 9,1% (il pareggio del Modulo 1); non tirare a indovinare, perché a caso la probabilità di azzeccare è prossima a zero [EURISTICA; il criterio di correzione è NON VERIFICATO].
+- Scrivi UNA sola risposta, un solo concetto, leggibile e dentro lo spazio. Non scrivere due alternative [EURISTICA: la risposta attesa è un solo concetto; cosa succeda con due risposte non è scritto].
+- Se non sei sicuro della forma esatta di un termine, scrivilo per esteso piuttosto che abbreviarlo [EURISTICA].
+- Considera nella tua stima anche il rischio che la forma che scrivi non coincida con quella attesa: abbassa p di conseguenza [EURISTICA].
+
+## Perché vale
+Un terzo dei quesiti (10 su 31) ha questo formato. La logica di convenienza è quella del Modulo 1, ma senza il +0,12 del caso: qui il valore dipende interamente da ciò che sai richiamare.
+
+## Dove smette di funzionare
+- Tutto ciò che riguarda il criterio di correzione è ignoto: i suggerimenti sono prudenti, non verificati.
+- Nei libri di esercizi il completamento si digita o si scrive in modo libero; in esame si scrive a mano in maiuscolo: il tempo reale può differire [NON VERIFICATO].
+- La penalità per una risposta a completamento errata è letta alla lettera dall'art. 8 c.1; una diversa applicazione non è esclusa [NON VERIFICATO].
+
+## Verifica
+- V | Nel completamento la risposta va scritta in stampatello maiuscolo | Allegato 2 punto 16.
+- F | Puoi correggere una risposta a completamento quante volte vuoi | Una sola volta, scrivendo nello spazio sottostante e annerendo la precedente.
+- V | Nei testi ufficiali letti non è scritto se un sinonimo viene accettato | Il criterio di correzione del completamento non è indicato.
+- F | Anche nel completamento, rispondendo a caso, hai il 20% di probabilità di azzeccare | Non ci sono opzioni: il +0,12 delle crocette a caso non vale qui.
+- V | La domanda a completamento chiede un solo e univoco concetto | Allegato 2 punto 4.
+- F | Il cerchietto di una domanda a completamento si può annullare dopo averlo barrato | Una volta apposto non è più modificabile.
+
+# Modulo 3 – Tempo
+Lettura: 5 minuti
+
+## Regola
+**I numeri di partenza**
+- 50 minuti = 3000 secondi per 31 domande [CERTO – DM 941 art. 7 c.3, p. 10].
+- Senza riserva sono 96,8 secondi in media per domanda [CALCOLO: 3000 / 31].
+
+**Regola del ritmo** [EURISTICA: scelta di strategia, non regola ufficiale; parametri modificabili nel Cronometro]
+- Tieni una riserva di 180 secondi per barrare i cerchietti delle omesse (irreversibili) e per l'ultimo controllo del modulo.
+- Budget per domanda = (3000 − riserva) / 31: con riserva 180 s sono 90,97 s [CALCOLO].
+- Limite morbido per una domanda: il doppio del budget, cioè 181,9 s con riserva 180 s [CALCOLO]. Oltre quel limite decidi: rispondi con la tua migliore stima, oppure lascia e passa [EURISTICA].
+- Il valore di 180 secondi è una scelta del progetto, non misurata su studenti [EURISTICA].
+
+| Minuto | Domande affrontate: riserva 180 s | Domande affrontate: riserva 0 |
+|---|---|---|
+| 10 | 6 | 6 |
+| 20 | 13 | 12 |
+| 30 | 19 | 18 |
+| 40 | 26 | 24 |
+
+Parte intera di (minuti × 60) / budget, con budget 90,97 s e 96,77 s [CALCOLO].
+
+**Quanto costa non finire** (le domande non lette sono omesse)
+
+| Domande non lette | Risposte date | Giuste minime per 18,0 | Errori ammessi |
+|---|---|---|---|
+| 0 | 31 | 20 | 11 |
+| 1 | 30 | 20 | 10 |
+| 2 | 29 | 19 | 10 |
+| 5 | 26 | 19 | 7 |
+| 10 | 21 | 19 | 2 |
+| 11 | 20 | 19 | 1 |
+| 12 | 19 | 19 | 0 |
+| 13 | 18 | 18 | 0 |
+| 14 o più | 17 o meno | non raggiungibile | – |
+
+Con A risposte date servono giuste C tali che 11·C − A ≥ 180 [CERTO – DM 941 art. 8 c.1 e c.3, p. 11; CALCOLO]. Con 14 domande non lette il massimo ottenibile è 17 punti, sotto la soglia.
+
+- Finire la prova conta più di scegliere con cura cosa omettere: nelle simulazioni su studenti ipotetici (non reali) il calo di probabilità di superare per le domande non lette supera il guadagno di omettere con criterio [STIMA].
+
+**Altre regole di tempo**
+- 30 minuti di intervallo tra una prova e l'altra [CERTO – Allegato 2 punto 6, p. 2].
+- Per invalidità o disabilità il tempo aggiuntivo non può superare il 50% (fino a 75 minuti); per i DSA è al massimo il 30% (fino a 65 minuti) [CERTO – Allegato 2 punto 7, p. 3; CALCOLO: 50 × 1,5 e 50 × 1,3]. Il tempo effettivo è stabilito dalla tua università.
+
+## Perché vale
+Con 31 domande in 50 minuti il rischio principale è consumare troppo tempo su poche domande [EURISTICA]. I checkpoint ti dicono a ogni 10 minuti se sei in anticipo o in ritardo, e la riserva protegge le operazioni irreversibili sul modulo.
+
+## Dove smette di funzionare
+- La regola assume tempo uniforme per ogni domanda e per ogni formato. Il tempo reale per formato non è noto [NON VERIFICATO].
+- Il tempo di allenamento senza pressione può non valere in esame [NON VERIFICATO].
+- Non è indicato se le operazioni sul modulo (etichette, consegna) rientrino nei 50 minuti [NON VERIFICATO].
+- Il trattamento di una domanda né risposta né barrata non è specificato: per questo la riserva include la barratura delle omesse [NON VERIFICATO].
+
+## Verifica
+- V | Con 31 domande in 50 minuti, senza riserva, il tempo medio è circa 96,8 secondi | 3000 / 31 = 96,77.
+- F | Con riserva di 180 secondi il budget è di 100 secondi per domanda | È (3000 − 180) / 31 = 90,97 secondi.
+- V | Con 29 risposte date servono almeno 19 giuste per arrivare a 18,0 | 19 − 1,0 = 18,0 con 10 errori; con 18 giuste e 11 errori si fermerebbe a 16,9.
+- F | Con 14 domande non lette puoi ancora arrivare a 18 | Con 17 risposte il massimo è 17 punti.
+- V | Il cerchietto va barrato per dare certezza di non rispondere ed è irreversibile | Allegato 2 punto 16.
+- F | Il budget di 90,97 secondi per domanda è un limite ufficiale | È una regola del ritmo del progetto, non un limite del decreto.
+
+# Modulo 4 – Giornata d'esame
+Lettura: 5 minuti
+
+## Regola
+**Durata e presenza**
+- Tre prove da 50 minuti con 30 minuti di intervallo tra una prova e l'altra: almeno 210 minuti di prove e intervalli (3×50 + 2×30) [CERTO – Allegato 2 punto 6, p. 2; CALCOLO]. A questi si aggiungono le operazioni d'aula, la cui durata non è indicata [NON VERIFICATO].
+- Devi presenziare per tutta la durata delle prove, anche se non devi sostenere tutti gli esami [CERTO – Allegato 2 punto 6, p. 2].
+- Per chi ha tempo aggiuntivo, i 30 minuti di intervallo decorrono dopo il tempo aggiuntivo [CERTO – Allegato 2 punto 7, p. 3].
+- L'ordine delle tre materie non è indicato [NON VERIFICATO].
+
+**Prima della prova**
+- Il Presidente della Commissione identifica gli studenti e consegna la scheda anagrafica precompilata; poi sorteggia quattro studenti per verificare l'integrità delle scatole; solo dopo viene consegnato il plico della prima prova [CERTO – Allegato 2 punto 12, p. 4].
+- Porta un documento di identità valido: l'identificazione è prevista, ma il documento richiesto non è indicato nei testi letti [EURISTICA; NON VERIFICATO]. Controlla la convocazione della tua università.
+
+**Che cosa trovi nel plico**
+- Fogli con le domande (con il codice del plico), due fogli di brutta copia, il modulo risposte con lo stesso codice, un foglio con il codice del plico [CERTO – Allegato 2 punto 14, p. 4].
+- Se qualcosa non va nel plico (pagine mancanti, difetti), segnalalo subito al Presidente o al Responsabile d'aula: verifica e, se necessario, sostituisce il plico per intero [CERTO – Allegato 2 punti 13–14, p. 4].
+
+**Il modulo risposte e le etichette**
+- Inizio prova: apponi una delle quattro etichette adesive sulla scheda anagrafica. Fine di ogni prova: una etichetta sul relativo modulo risposte. Controlla che i codici coincidano e firma in calce alla scheda anagrafica [CERTO – Allegato 2 punto 16, p. 5].
+- A conclusione di ogni prova inserisci il modulo risposte nel contenitore chiuso [CERTO – Allegato 2 punto 16, p. 5]. Dopo non puoi più tornare su quella prova.
+- Non è indicato se applicare le etichette rientri nei 50 minuti: chiedilo al Presidente o al Responsabile d'aula all'inizio [EURISTICA; NON VERIFICATO].
+- I fogli con le domande restano all'università: non puoi portarli via [CERTO – Allegato 2 punto 17, p. 5]. Puoi invece visualizzare e scaricare l'immagine del tuo modulo risposte dall'area personale [CERTO – Allegato 2 punto 24, p. 7].
+
+**Dopo la prova**
+- Il Ministero pubblica solo il punteggio, in ordine di codice etichetta [CERTO – Allegato 2 punto 20, p. 6]. Tu consulti i tuoi punteggi nell'area personale di Universitaly, con autenticazione a due fattori; gli studenti italiani accedono con SPID o CIE [CERTO – Allegato 2 punto 24, p. 7].
+- Verifica prima degli esiti che SPID o CIE funzionino [EURISTICA].
+
+**Se hai invalidità, legge 104 o DSA**
+- Devi presentare la certificazione all'università nel corso del semestre filtro e comunque non meno di 15 giorni prima della data delle prove [CERTO – Allegato 2 punto 7, pp. 2–3]. Per l'appello del 10/12/2026 significa non oltre il 25/11/2026 [CALCOLO sulla data SEU].
+- Tempo aggiuntivo: fino al 50% per invalidità o 104; fino al 30% per DSA [CERTO – Allegato 2 punto 7, p. 3].
+
+## Perché vale
+Conoscere in anticipo i passaggi riduce il rischio di perdere minuti o di commettere un errore irreversibile (etichette, cerchietti, correzione unica) in una giornata lunga.
+
+## Dove smette di funzionare
+- L'organizzazione concreta (orari, aule, oggetti ammessi, uscite durante gli intervalli) dipende dall'ateneo e dalla convocazione, non dal decreto: nei testi letti non sono scritti [NON VERIFICATO].
+- Non è indicato se si possa scrivere sul foglio con le domande: per le note provvisorie la fonte certa sono i due fogli di brutta copia [CERTO – Allegato 2 punto 14, p. 4].
+- Le date vengono da SEU, non dal DM 941: verifica quelle della tua università [CERTO – fonte SEU].
+
+## Verifica
+- V | Tra l'inizio della prima prova e la fine dell'ultima passano almeno 210 minuti | 3 × 50 + 2 × 30, esclusi tempi aggiuntivi e operazioni d'aula.
+- F | Se hai finito gli esami che ti interessano puoi andare via prima | Devi presenziare per tutta la durata delle prove (Allegato 2 punto 6).
+- V | Il modulo risposte di ogni prova va nel contenitore alla fine di quella prova | Allegato 2 punto 16.
+- F | Puoi usare la penna che preferisci | Solo la penna nera data in dotazione.
+- V | I fogli con le domande restano all'università | Allegato 2 punto 17.
+- F | L'ordine delle prove è Chimica, Fisica, Biologia | L'ordine non è indicato nei testi letti.
+
+# Modulo 5 – Obiettivo reale (tre esami)
+Lettura: 5 minuti
+
+## Regola
+**La graduatoria**
+- Entrano in graduatoria gli studenti che hanno superato almeno uno dei tre esami [CERTO – DM 941 art. 10 c.1, p. 13]. Con nessun esame superato non si entra.
+- Sezione 1: 18/30 o più in tutti e tre gli esami (+300 punti). Sezione 2: 18/30 o più in due esami su tre (+200). Sezione 3: in uno solo (+100). Il punteggio è il bonus più la somma dei voti accettati [CERTO – art. 10 c.2, pp. 13–14].
+
+| Esami superati | Bonus | Intervallo del punteggio finale |
+|---|---|---|
+| 3 su 3 | +300 | 354 – 393 |
+| 2 su 3 | +200 | 236 – 262 |
+| 1 su 3 | +100 | 118 – 131 |
+
+Estremi: bonus più il minimo 18 per esame superato e il massimo 31 per esame (93 in tutto, art. 8 c.2) [CALCOLO]. Gli intervalli non si sovrappongono: chi supera tre esami precede sempre chi ne supera due, anche con voti più alti [CERTO – ordine delle sezioni, art. 10 c.1; CALCOLO sugli intervalli].
+
+**La conseguenza operativa**
+- Passare da 2 a 3 esami superati vale almeno 118 punti (100 di bonus più almeno 18 dell'esame in più), mentre alzare un esame già superato da 18 a 31 ne vale al massimo 13 [CALCOLO].
+- Quando devi scegliere dove far valere un punto, un punto che porta una materia da sotto a sopra 18 vale di più di un punto in una materia già sopra [EURISTICA: conseguenza della regola; non è un piano di studio].
+
+**Due prove, accettazione, rifiuto**
+- Se sostieni entrambe le prove di un insegnamento prevale la più alta, purché sia almeno 18/30: un secondo tentativo non può abbassare un voto già valido [CERTO – art. 8 c.4, p. 11].
+- Per ogni insegnamento con voto da 18 in su devi accettare o rifiutare il voto entro le 23:59 (ora italiana) del giorno dopo la pubblicazione degli esiti della seconda prova. Se non fai nulla il voto è accettato [CERTO – art. 8 c.5, p. 11; Allegato 2 punto 23, p. 7]. Con esiti il 20/01/2027 il termine è il 21/01/2027 alle 23:59 [CALCOLO sulla data SEU].
+- Conta per graduatoria solo il voto accettato [CERTO – art. 8 c.5, p. 11].
+- Se rifiuti un voto e ti collochi in posizione utile, devi conseguire i CFU di quell'insegnamento nell'ateneo di assegnazione [CERTO – art. 8 c.6, p. 11]. Prima di rifiutare leggi gli artt. 12 e 13 del DM 941 (pp. 16–17).
+
+**Il punto 18 non è sempre il punto che conta**
+- Giuste minime per 18,0 con A risposte date (A = giuste + errate): A = 18 → 18; A = da 19 a 29 → 19; A = 30 o 31 → 20 [CERTO – DM 941 art. 8 c.1 e c.3; CALCOLO: 11·C − A ≥ 180].
+- Con 29 risposte puoi sbagliare al massimo 10; con 30 risposte sempre 10, ma servono 20 giuste; con 31 risposte puoi sbagliare 11 [CALCOLO]. Quindi la trentesima risposta non allarga il margine di errore: richiede una giusta in più.
+- Massimizzare i punti attesi non coincide con massimizzare la probabilità di arrivare a 18: nelle simulazioni su studenti ipotetici la differenza tra «rispondi a 29» e «rispondi a tutte» è piccola e incerta [STIMA]. Nessuna regola fissa deriva da qui.
+
+**Esempio di valutazione dei tre esami**
+- Esame A: 20 giuste e 11 errate = 18,9. Esame B: 19 giuste e 10 errate = 18,0. Esame C: 18 giuste e nessuna errata = 18,0. Tre voti da 18 o più: sezione 1 (+300) [CALCOLO].
+- Un esame con 18 giuste e 1 errata vale 17,9: non supera [CALCOLO; art. 8 c.3].
+
+## Perché vale
+La graduatoria ordina prima per numero di esami superati e poi per punteggio: l'obiettivo prioritario è non lasciare indietro nessuno dei tre esami, e solo dopo alzare i voti.
+
+## Dove smette di funzionare
+- Superare tre esami non garantisce un posto: i posti dipendono da punteggio e graduatoria nazionale; il 22/01/2027 alle 16:00 è la data di pubblicazione indicata [CERTO – fonte SEU].
+- Nei testi letti non è scritto se la somma dei voti in graduatoria usi punteggi arrotondati o no; non incide sull'ordine tra sezioni [NON VERIFICATO].
+- Questa release non stima la tua probabilità di superare: nessun numero qui è una previsione sul tuo risultato [NON VERIFICATO].
+
+## Verifica
+- V | Chi supera tre esami precede sempre chi ne supera due | 354 (minimo con tre esami) è maggiore di 262 (massimo con due).
+- F | Se non rispondi entro il termine il voto viene scartato | Il silenzio equivale ad accettazione (art. 8 c.5).
+- V | Un voto rifiutato non conta per l'inserimento e la collocazione in graduatoria | Rileva solo il voto accettato (art. 8 c.5).
+- F | Chi supera un solo esame su tre non entra in graduatoria | Entra nella sezione 3, con +100 e recupero dei CFU degli altri (art. 10 c.1).
+- V | Con 30 risposte servono 20 giuste per arrivare a 18,0 | 11 × 20 − 30 = 190 ≥ 180, mentre 11 × 19 − 30 = 179 non basta.
+- F | Con 18 giuste e 1 errata si supera l'esame | 18 − 0,1 = 17,9, sotto la soglia di 18,0.
+
+# Guida d'uso
+
+## Che cosa fa l'app e che cosa no
+- L'app non contiene quesiti e non spiega teoria: non sostituisce lo studio né i tuoi libri.
+- Serve per tre cose: capire le regole e la strategia di questa prova (i moduli), calcolare il punteggio e il margine d'errore (Calcolatore), allenare il ritmo (Cronometro).
+- Non prevede il tuo voto e non promette punti: l'effetto dell'app non è stato misurato [NON VERIFICATO].
+
+## Come usare gli esercizi del libro
+- Riconosci i due formati nel libro: esercizi con 5 opzioni (come le 21 crocette) e esercizi a risposta libera (come i 10 a completamento). Gli esercizi degli editori NON sono quesiti d'esame e lo stile dei quesiti nazionali 2026 è ignoto [NON VERIFICATO].
+- Prima di guardare la soluzione decidi la risposta e quanto sei sicuro: alta (almeno 80%), media (tra 50% e 80%), bassa (meno del 50%). Se la sicurezza dichiarata coincide con gli esiti, la tua stima di p è affidabile; se no, è da correggere [EURISTICA].
+- Per allenare il completamento con un esercizio a crocette, copri le opzioni e scrivi la risposta in maiuscolo; poi confronta [EURISTICA].
+- Ogni tanto scrivi a mano in stampatello maiuscolo, come in esame [EURISTICA].
+- Per allenare il tempo usa il Cronometro: 31 domande, 50 minuti, riserva 180 secondi. Il tempo di allenamento senza pressione può non valere in esame [NON VERIFICATO].
+- Quando sbagli, annota il tipo di errore: «non lo sapevo», «lo sapevo ma ho sbagliato» (lettura, calcolo, distrazione), «tempo» [EURISTICA]. Serve a capire dove perdere meno punti, non a pianificare lo studio.
+- Le soluzioni di un libro possono contenere refusi o errori: se una soluzione non ti convince, verificala con il docente o con un'altra fonte [CONOSCENZA GENERALE].
+- Gli argomenti dell'esame seguono i Syllabus 2026 [CERTO – Allegato 2 punto 3, p. 1; DM 941 art. 13 c.2, p. 17].
+
+## Che cosa dice la ricerca sul modo di studiare
+- Fare test su ciò che si studia e distribuire lo studio nel tempo hanno un'utilità alta; rileggere, sottolineare e riassumere hanno un'utilità bassa [CONOSCENZA GENERALE – Dunlosky et al. 2013, sintesi APS].
+- Queste conclusioni vengono dalla ricerca generale sull'apprendimento, non da dati su questa prova né sull'app [NON VERIFICATO]. L'organizzazione del tuo tempo di studio resta tua: l'app non propone un piano.
+
+## Come usare il Registro
+- Registra voce per voce: materia, formato, unità (facoltativa), la confidenza scelta prima di guardare la soluzione, poi l'esito. L'app non può controllare che la confidenza sia davvero scelta prima: se la cambi dopo, i Livelli non misurano più nulla.
+- Se rifai esercizi che hai già svolto, accendi l'interruttore «Ripasso»: quelle voci non contano per la calibrazione. Solo le prime risposte contano. L'interruttore si spegne ogni volta che apri l'app.
+- L'unità è quella del Syllabus (UD1–UD7), non il capitolo del libro: la scegli tu dai titoli mostrati. Se non sei sicuro, lasciala su «Nessuna»: la voce conta comunque nei Livelli.
+- La scheda Analisi ha due parti. I Livelli mostrano la percentuale di giuste per livello di confidenza solo con almeno 25 prime risposte per livello, con intervallo di incertezza. Sotto 25 vedrai «dati insufficienti»: non è un errore, è una cautela [CALCOLO].
+- La parte Unità serve con molte risposte: a 15 risposte al giorno per 30 giorni ne hai circa 21 per unità, sotto la soglia di 25 [STIMA]. Aspettati spesso «dati insufficienti».
+- Il Registro non confronta le tue risposte con una chiave: l'esito lo valuti tu, con la soluzione del libro.
+
+## I tuoi dati
+- I dati restano nel browser del tuo dispositivo. Usa Esporta con regolarità per averne una copia, e Importa per ripristinarla.
+- Su alcuni browser (Safari) i dati di un sito possono essere cancellati dopo 7 giorni senza visite [NON VERIFICATO]: esporta spesso.
+- Apri l'app sempre dal link, non da un file ricevuto: da file locale i progressi possono non essere salvati.
+
+## Prima dell'esame
+- Rileggi i Moduli 0, 3 e 4, e usa il Calcolatore con alcuni esempi per memorizzare le giuste minime: A = 18 → 18; da 19 a 29 → 19; 30 o 31 → 20.
+- Verifica che SPID o CIE funzionino e controlla la convocazione della tua università [EURISTICA].
+</script>
+<script id="unita" type="text/plain">Revisione: v1 – 27/10/2026
+Titoli delle sette unità didattiche (UD) dei tre Syllabus 2026, usati dall'app nelle schermate Registro e Unità.
+Fonte: Syllabus 2026 nel Project, nella forma ripresa da `FRAMEWORK.md` §3 (tabelle UD/titolo/CFU). Fisica: titoli come in FRAMEWORK. Chimica e Biologia: titoli ABBREVIATI dalla Regia; per i titoli letterali vale il PDF del Syllabus. I titoli non sono stati riletti sui PDF in questa chat [NON VERIFICATO oltre FRAMEWORK §3].
+Formato: una riga per unità, `MATERIA | numero | titolo`, con MATERIA = CHIM, FIS, BIO e numero = 1…7. Sette righe per materia. Righe che non iniziano per CHIM, FIS o BIO sono ignorate.
+
+CHIM | 1 | Atomo, legami, stati della materia, termodinamica
+CHIM | 2 | Miscele, soluzioni, proprietà colligative
+CHIM | 3 | Reazioni, cinetica, equilibrio chimico
+CHIM | 4 | Acidi e basi, pH, tamponi, redox, elettrochimica
+CHIM | 5 | Carbonio, idrocarburi, alogenuri, aromatici
+CHIM | 6 | Gruppi funzionali e isomerie
+CHIM | 7 | Amminoacidi, proteine, carboidrati, lipidi, nucleotidi
+
+FIS | 1 | Introduzione ai metodi della fisica
+FIS | 2 | Meccanica
+FIS | 3 | Meccanica dei fluidi
+FIS | 4 | Onde meccaniche
+FIS | 5 | Termodinamica
+FIS | 6 | Elettricità e magnetismo
+FIS | 7 | Fisica delle radiazioni
+
+BIO | 1 | Basi dell'organizzazione biologica e molecolare
+BIO | 2 | Trasmissione e controllo dell'informazione genetica ed epigenetica
+BIO | 3 | Il flusso dell'informazione
+BIO | 4 | Trasmissione e controllo dei caratteri selvatici e mutati
+BIO | 5 | Strutture cellulari: biogenesi, morfologia, funzioni
+BIO | 6 | Cellula e ambiente, segnalazione, trasduzione
+BIO | 7 | Controllo di proliferazione e sopravvivenza cellulare
+</script>
+<script id="app">
+(function () {
+'use strict';
+const M = MotoreF4, L = LogicaF4d;
+const CHIAVE_LS = 'triage_f4d_v1';
+
+// ------------------------------------------------------------------ contenuti (incorporati dal build)
+const CONTENUTI = L.parseContenuti(document.getElementById('contenuti').textContent);
+const UNITA = L.parseUnita(document.getElementById('unita').textContent);   // titoli UD1…UD7 (null se mancano)
+const TITOLI = UNITA.errori.length ? null : UNITA.titoli;
+
+// ------------------------------------------------------------------ stato e salvataggio
+let stato = L.statoVuoto();
+const ui = { schermata: 'home', modulo: null, strumento: 'calcolatore', analisi: 'livelli', msg: null, storageOk: true, errore_carico: null, conferma_azzera: false, verifica: {},
+  ripasso: false, corrente: null, errReg: null, confermaElimina: null };   // ripasso e corrente NON si salvano: a ogni apertura sono spenti
+
+function caricaStato() {
+  try { const k = '__triage_test__'; localStorage.setItem(k, '1'); localStorage.removeItem(k); } catch (e) { ui.storageOk = false; return; }
+  let raw = null;
+  try { raw = localStorage.getItem(CHIAVE_LS); } catch (e) { ui.storageOk = false; return; }
+  if (raw === null) return;
+  try { const s = L.statoDaSalvato(JSON.parse(raw)); if (s) { stato = s; return; } } catch (e) { /* cade sotto */ }
+  try { localStorage.setItem(CHIAVE_LS + '_corrotto', raw); } catch (e) { /* niente */ }
+  ui.errore_carico = 'I progressi salvati non erano leggibili: ne è stata tenuta una copia grezza (chiave «' + CHIAVE_LS + '_corrotto») e si riparte da zero.';
+}
+function salva() {
+  try { localStorage.setItem(CHIAVE_LS, JSON.stringify(stato)); ui.storageOk = true; } catch (e) { ui.storageOk = false; }
+  avvisi();
+}
+
+// ------------------------------------------------------------------ utilita' DOM
+function h(tag, attrs) {
+  const el = document.createElement(tag);
+  if (attrs) for (const k of Object.keys(attrs)) {
+    const v = attrs[k];
+    if (v === null || v === undefined || v === false) continue;
+    if (k === 'on') { for (const ev of Object.keys(v)) el.addEventListener(ev, v[ev]); }
+    else if (k === 'class') el.className = v;
+    else if (k === 'text') el.textContent = v;
+    else if (k === 'value') el.value = v;
+    else if (k === 'disabled') el.disabled = !!v;
+    else el.setAttribute(k, v === true ? '' : String(v));
+  }
+  const aggiungi = (c) => {
+    if (c === null || c === undefined || c === false) return;
+    if (Array.isArray(c)) { c.forEach(aggiungi); return; }
+    el.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  };
+  for (let i = 2; i < arguments.length; i++) aggiungi(arguments[i]);
+  return el;
+}
+const $main = () => document.getElementById('main');
+function svuota(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+function vai(s, modulo) { ui.schermata = s; ui.modulo = modulo || null; ui.msg = null; ui.conferma_azzera = false; render(); window.scrollTo(0, 0); }
+
+/** pezzi del parser -> nodi DOM (mai innerHTML) */
+function inline(tok) {
+  return tok.map((x) => {
+    if (x.t === 'b') return h('strong', { text: x.testo });
+    if (x.t === 'i') return h('em', { text: x.testo });
+    if (x.t === 'et' && x.nomi && x.nomi.length > 1) {
+      return h('span', { title: 'Etichetta: ' + x.testo }, x.nomi.map((n, i) => [i ? ' ' : null, h('span', { class: 'et et-' + n.classe, text: n.tipo })]), x.residuo ? ' ' + x.residuo + ' ' : ' ');
+    }
+    if (x.t === 'et') return h('span', { class: 'et et-' + x.classe, text: x.testo, title: 'Etichetta: ' + x.tipo });
+    return x.testo;
+  });
+}
+const badge = (tipo, testo) => h('span', { class: 'et et-' + { 'NON VERIFICATO': 'nv', 'CONOSCENZA GENERALE': 'cg', CERTO: 'certo', CALCOLO: 'calc', EURISTICA: 'eur', STIMA: 'stima' }[tipo], text: testo || tipo });
+
+function avvisi() {
+  const box = document.getElementById('avvisi'); svuota(box);
+  const add = (t) => box.appendChild(h('div', { class: 'avviso', role: 'alert', text: t }));
+  if (location.protocol === 'file:') add('Pagina aperta da file locale: i progressi possono non essere salvati o andare persi. Apri l\'app dal suo link https.');
+  if (!ui.storageOk) add('Il salvataggio nel browser non è disponibile (o è pieno): i progressi di questa pagina NON verranno conservati. Usa «Esporta» nella sezione Dati prima di chiudere.');
+  if (ui.errore_carico) add(ui.errore_carico);
+}
+
+function nav() {
+  const n = document.getElementById('nav'); svuota(n);
+  const voci = [['home', 'Home'], ['corso', 'Corso'], ['registro', 'Registro'], ['analisi', 'Analisi'], ['strumenti', 'Strumenti'], ['dati', 'Dati']];
+  for (const [k, t] of voci) {
+    const corrente = ui.schermata === k || (k === 'corso' && ui.schermata === 'modulo');
+    n.appendChild(h('button', { type: 'button', text: t, 'aria-current': corrente ? 'page' : null, on: { click: () => vai(k) } }));
+  }
+}
+
+function render() {
+  nav(); avvisi();
+  const m = $main(); svuota(m);
+  const f = { home: rHome, corso: rCorso, modulo: rModulo, registro: rRegistro, analisi: rAnalisi, strumenti: rStrumenti, dati: rDati }[ui.schermata] || rHome;
+  f(m);
+  if (ui.schermata === 'strumenti' && ui.strumento === 'cronometro') aggiornaCrono();
+}
+
+const letto = (id) => stato.letti.includes(id);
+const elementiCorso = () => CONTENUTI.moduli.concat(CONTENUTI.guida ? [CONTENUTI.guida] : []);
+const trovaElemento = (id) => elementiCorso().find((x) => x.id === id) || null;
+function provvisorio() { return CONTENUTI.segnaposto ? h('div', { class: 'prov', role: 'note', text: 'Contenuti provvisori (segnaposto): non sono contenuti del corso.' }) : null; }
+
+// ------------------------------------------------------------------ Home
+function rHome(m) {
+  m.appendChild(h('h2', { text: 'Home' }));
+  m.appendChild(h('p', { text: 'Strumento di allenamento strategico: non sostituisce lo studio. Regole d\'esame dal DM 941 del 10/7/2026.' }));
+  const pv = provvisorio(); if (pv) m.appendChild(pv);
+  const agg = L.aggrega_registro(stato.registro);
+  const liv = L.LIVELLI.map((l, i) => { const n = agg.livelli[l][1]; return [i ? ' · ' : '', h('span', { class: n >= L.SOGLIA ? 'sbloccato' : null, 'data-livello': l }, L.NOME_LIVELLO[l] + ' ' + n + (n >= L.SOGLIA ? ' ✓' : ''))]; });
+  m.appendChild(h('div', { class: 'card', id: 'riepilogo-home' }, h('p', {}, h('strong', { text: 'Prime risposte valutate: ' + agg.totale_prime })),
+    h('p', { class: 'small' }, 'Per livello di confidenza (ne servono ' + L.SOGLIA + ' per vedere i Livelli): ', liv)));
+  const c = h('div', { class: 'card' }, h('h3', { text: 'Corso' }));
+  if (CONTENUTI.moduli.length === 0) c.appendChild(h('p', { class: 'muted', text: 'Nessun modulo disponibile.' }));
+  for (const mod of CONTENUTI.moduli) {
+    c.appendChild(h('button', { type: 'button', class: 's blocco', 'data-modulo': mod.id, on: { click: () => vai('modulo', mod.id) } },
+      'Modulo ' + mod.n + ' – ' + mod.titolo, h('span', { class: 'stato' + (letto(mod.id) ? ' letto' : ''), text: letto(mod.id) ? 'letto' : 'da leggere' })));
+  }
+  if (CONTENUTI.guida) c.appendChild(h('button', { type: 'button', class: 's blocco', 'data-modulo': 'guida', on: { click: () => vai('modulo', 'guida') } }, CONTENUTI.guida.titolo));
+  m.appendChild(c);
+  m.appendChild(h('div', { class: 'card' }, h('h3', { text: 'Altro' }),
+    h('button', { type: 'button', class: 's blocco', id: 'b-registro', text: 'Registro: registra le risposte ai tuoi esercizi', on: { click: () => vai('registro') } }),
+    h('button', { type: 'button', class: 's blocco', id: 'b-livelli', text: 'Livelli: quanto ti puoi fidare della tua confidenza', on: { click: () => { ui.analisi = 'livelli'; vai('analisi'); } } }),
+    h('button', { type: 'button', class: 's blocco', id: 'b-unita', text: 'Unità: risultati per materia e unità', on: { click: () => { ui.analisi = 'unita'; vai('analisi'); } } }),
+    h('button', { type: 'button', class: 's blocco', text: 'Strumenti: calcolatore e cronometro', on: { click: () => vai('strumenti') } }),
+    h('button', { type: 'button', class: 's blocco', text: 'Dati: esporta, importa, azzera', on: { click: () => vai('dati') } })));
+}
+
+// ------------------------------------------------------------------ Corso
+function rCorso(m) {
+  m.appendChild(h('h2', { text: 'Corso' }));
+  const pv = provvisorio(); if (pv) m.appendChild(pv);
+  m.appendChild(h('p', { class: 'muted small', text: 'Contenuti: revisione ' + (CONTENUTI.revisione || 'non indicata') + '.' }));
+  for (const el of elementiCorso()) {
+    const titolo = el.id === 'guida' ? el.titolo : 'Modulo ' + el.n + ' – ' + el.titolo;
+    m.appendChild(h('button', { type: 'button', class: 's blocco', 'data-modulo': el.id, on: { click: () => vai('modulo', el.id) } }, titolo,
+      el.lettura ? h('span', { class: 'muted small', text: ' · ' + el.lettura + ' min' }) : null,
+      el.id !== 'guida' ? h('span', { class: 'stato' + (letto(el.id) ? ' letto' : ''), text: letto(el.id) ? 'letto' : 'da leggere' }) : null));
+  }
+}
+
+function bloccoDom(b) {
+  if (b.t === 'p') return h('p', {}, inline(b.tok));
+  if (b.t === 'ul') return h('ul', {}, b.voci.map((v) => h('li', {}, inline(v))));
+  const t = h('table');
+  if (b.intest) t.appendChild(h('thead', {}, h('tr', {}, b.intest.map((c) => h('th', {}, inline(c))))));
+  t.appendChild(h('tbody', {}, b.righe.map((r) => h('tr', {}, r.map((c) => h('td', {}, inline(c)))))));
+  return h('div', { class: 'tabwrap' }, t);
+}
+
+function rModulo(m) {
+  const el = trovaElemento(ui.modulo);
+  if (!el) { vai('corso'); return; }
+  m.appendChild(h('div', { class: 'riga' }, h('button', { type: 'button', class: 't', text: '← Corso', on: { click: () => vai('corso') } })));
+  m.appendChild(h('h2', { text: el.id === 'guida' ? el.titolo : 'Modulo ' + el.n + ' – ' + el.titolo }));
+  const pv = provvisorio(); if (pv) m.appendChild(pv);
+  if (el.lettura) m.appendChild(h('p', { class: 'muted small', text: 'Lettura: ' + el.lettura + ' minuti' }));
+  for (const s of el.sezioni) {
+    m.appendChild(h('h3', { text: s.titolo }));
+    s.blocchi.forEach((b) => m.appendChild(bloccoDom(b)));
+  }
+  if (el.verifica && el.verifica.length) {
+    m.appendChild(h('h3', { text: 'Verifica' }));
+    m.appendChild(h('p', { class: 'muted small', text: 'Vero o falso? Le risposte non vengono salvate.' }));
+    el.verifica.forEach((v, i) => m.appendChild(rVerifica(el.id, i, v)));
+  }
+  if (el.id !== 'guida') {
+    const l = letto(el.id);
+    m.appendChild(h('div', { class: 'riga' }, h('button', { type: 'button', class: l ? 's' : 'p', id: 'b-letto', text: l ? 'Letto ✓ – segna come da leggere' : 'Segna come letto', on: { click: () => {
+      stato.letti = l ? stato.letti.filter((x) => x !== el.id) : stato.letti.concat([el.id]).sort(); salva(); render();
+    } } })));
+  }
+}
+
+function rVerifica(id, i, v) {
+  const k = id + '#' + i, data = ui.verifica[k];
+  const box = h('div', { class: 'ver', 'data-verifica': k }, h('p', {}, inline(v.affermazione)));
+  const rispondi = (x) => { ui.verifica[k] = x; render(); const el = document.querySelector('[data-verifica="' + k + '"]'); if (el) el.scrollIntoView({ block: 'nearest' }); };
+  box.appendChild(h('div', { class: 'riga' },
+    h('button', { type: 'button', class: 's', text: 'Vero', disabled: !!data, on: { click: () => rispondi('V') } }),
+    h('button', { type: 'button', class: 's', text: 'Falso', disabled: !!data, on: { click: () => rispondi('F') } })));
+  if (data) {
+    const giusta = (data === 'V') === v.vero;
+    box.appendChild(h('div', { class: 'esito' },
+      h('p', { class: giusta ? 'esito-ok' : 'esito-ko', text: giusta ? 'Giusto' : 'Sbagliato' }),
+      h('p', {}, 'La risposta corretta era ' + (v.vero ? 'Vero' : 'Falso') + '. ', inline(v.spiegazione))));
+  }
+  return box;
+}
+
+// ------------------------------------------------------------------ Registro (BRIEF passo2 §4.2)
+const sessione = () => stato.impostazioni.sessione;
+const NOME_FORMATO_BREVE = { C: 'Crocetta', COMP: 'Completamento' };
+const nomeUnita = (mat, u) => L.nomeUnita(TITOLI, mat, u);
+function oraVoce(ts) { const d = new Date(ts), p = (n) => String(n).padStart(2, '0'); return p(d.getHours()) + ':' + p(d.getMinutes()); }
+function descrizioneVoce(v) {
+  return L.NOME_MATERIA[v.materia] + ' · ' + NOME_FORMATO_BREVE[v.formato] + ' · ' + (v.unita ? 'UD' + v.unita : 'senza unità') + ' · confidenza ' + L.NOME_LIVELLO[v.livello]
+    + (v.esito === null ? '' : ' · ' + (v.esito ? 'giusta' : 'sbagliata')) + ' · ' + oraVoce(v.ts) + (v.prima ? '' : ' · ripasso');
+}
+function applicaRegistro(r) { stato.registro = r.registro; salva(); render(); }
+
+function rRegistro(m) {
+  m.appendChild(h('p', { class: 'small', text: 'Registra una risposta ai tuoi esercizi del libro. L\'app non mostra quesiti e non conosce le soluzioni: l\'esito lo giudichi tu.' }));
+  m.appendChild(h('div', { class: 'evid', role: 'note', text: 'L\'app non può controllare che tu scelga la confidenza prima di guardare la soluzione: se la cambi dopo, i Livelli non misurano più nulla.' }));
+  if (ui.ripasso) m.appendChild(h('div', { class: 'rip', id: 'banda-ripasso', role: 'status', text: 'RIPASSO ACCESO – non entra nei Livelli' }));
+  const s = sessione();
+  const setS = (k, v) => { s[k] = v; salva(); render(); };
+  const seg = (id, opzioni, corrente, onSet) => h('div', { class: 'seg', id }, opzioni.map(([k, t]) => h('button', { type: 'button', text: t, 'data-v': String(k), 'aria-pressed': corrente === k ? 'true' : 'false', on: { click: () => onSet(k) } })));
+  const sel = h('select', { id: 's-unita', 'aria-label': 'Unità' }, h('option', { value: '', text: 'Nessuna' }),
+    [1, 2, 3, 4, 5, 6, 7].map((u) => h('option', { value: String(u), text: s.materia ? nomeUnita(s.materia, u) : 'UD' + u })));
+  sel.value = s.unita === null ? '' : String(s.unita);
+  sel.addEventListener('change', () => setS('unita', sel.value === '' ? null : Number(sel.value)));
+  const rip = h('input', { type: 'checkbox', id: 's-ripasso', checked: ui.ripasso ? true : null, on: { change: (e) => { ui.ripasso = e.target.checked; render(); } } });
+  rip.checked = ui.ripasso;
+  m.appendChild(h('div', { class: 'card sessione' },
+    h('label', { text: 'Materia (obbligatoria)' }), seg('s-materia', L.MATERIE.map((k) => [k, L.NOME_MATERIA[k]]), s.materia, (k) => setS('materia', k)),
+    h('label', { text: 'Formato' }), seg('s-formato', L.FORMATI.map((k) => [k, L.NOME_FORMATO[k]]), s.formato, (k) => setS('formato', k)),
+    h('div', { class: 'griglia2' },
+      h('div', {}, h('label', { for: 's-unita', text: 'Unità (facoltativa)' }), sel),
+      h('label', { class: 'ripswitch' }, rip, h('span', { class: 'small', text: 'Ripasso (ho già risposto a questi esercizi)' })))));
+  if (ui.errReg) m.appendChild(h('p', { class: 'err', role: 'alert', id: 'err-reg', text: ui.errReg }));
+
+  const cor = ui.corrente ? stato.registro.find((x) => x.id === ui.corrente && x.esito === null) : null;
+  if (!cor) {
+    ui.corrente = null;
+    const conf = h('div', { class: 'card conf', id: 'passo1' }, h('h3', { text: 'Prima di guardare la soluzione: quanto sei sicuro/a?' }));
+    const bott = [['A', 'Alta – quasi sicuro/a (almeno 80%)'], ['M', 'Media – tra 50% e 80%'], ['B', 'Bassa – meno del 50%, quasi a caso']];
+    for (const [l, t] of bott) conf.appendChild(h('button', { type: 'button', class: 'p', text: t, 'data-livello': l, disabled: !s.materia, on: { click: () => {
+      const r = L.registraConfidenza(stato.registro, s, l, !ui.ripasso, new Date());
+      if (!r.ok) { ui.errReg = r.errore; render(); return; }
+      ui.errReg = null; ui.corrente = r.voce.id; applicaRegistro(r);
+    } } }));
+    if (!s.materia) conf.appendChild(h('p', { class: 'muted small', text: 'Scegli prima la materia.' }));
+    m.appendChild(conf);
+  } else {
+    const dec = (esito) => { const r = L.impostaEsito(stato.registro, cor.id, esito); ui.corrente = null; if (r.ok) applicaRegistro(r); else render(); };
+    m.appendChild(h('div', { class: 'card conf', id: 'passo2' }, h('h3', { text: 'Ora guarda la soluzione sul libro: la tua risposta era giusta?' }),
+      h('p', { class: 'muted small', text: 'Confidenza registrata: ' + L.NOME_LIVELLO[cor.livello] + ' (non modificabile).' }),
+      h('button', { type: 'button', class: 'p', id: 'e-giusta', text: 'Giusta', on: { click: () => dec(true) } }),
+      h('button', { type: 'button', class: 'p', id: 'e-sbagliata', text: 'Sbagliata', on: { click: () => dec(false) } }),
+      h('button', { type: 'button', class: 's', id: 'e-dopo', style: 'width:100%;text-align:left', text: 'Decido dopo', on: { click: () => { ui.corrente = null; render(); } } })));
+  }
+
+  const agg = L.aggrega_registro(stato.registro);
+  m.appendChild(h('p', { class: 'prog', id: 'riepilogo-reg', text: 'Prime risposte valutate: ' + agg.totale_prime + ' · in sospeso: ' + agg.in_sospeso + ' · ripassi: ' + agg.ripassi }));
+
+  const riga = (v, bottoni) => h('div', { class: 'voce', 'data-id': v.id }, h('div', { class: 'small', text: descrizioneVoce(v) }),
+    ui.confermaElimina === v.id
+      ? h('div', { class: 'riga' }, h('span', { text: 'Eliminare questa voce?' }),
+        h('button', { type: 'button', class: 'p', 'data-azione': 'elimina-si', text: 'Sì, elimina', on: { click: () => { ui.confermaElimina = null; if (ui.corrente === v.id) ui.corrente = null; applicaRegistro(L.eliminaVoce(stato.registro, v.id)); } } }),
+        h('button', { type: 'button', class: 's', text: 'Annulla', on: { click: () => { ui.confermaElimina = null; render(); } } }))
+      : h('div', { class: 'riga' }, bottoni));
+  const elim = (v) => h('button', { type: 'button', class: 't', 'data-azione': 'elimina', text: 'Elimina', on: { click: () => { ui.confermaElimina = v.id; render(); } } });
+
+  const sosp = L.inSospeso(stato.registro);
+  if (sosp.length) {
+    const c = h('div', { class: 'card', id: 'in-sospeso' }, h('h3', { text: 'In sospeso (' + sosp.length + ')' }));
+    for (const v of sosp) c.appendChild(riga(v, [
+      h('button', { type: 'button', class: 's', 'data-azione': 'giusta', text: 'Giusta', on: { click: () => applicaRegistro(L.impostaEsito(stato.registro, v.id, true)) } }),
+      h('button', { type: 'button', class: 's', 'data-azione': 'sbagliata', text: 'Sbagliata', on: { click: () => applicaRegistro(L.impostaEsito(stato.registro, v.id, false)) } }), elim(v)]));
+    m.appendChild(c);
+  }
+  const ult = L.ultimeValutate(stato.registro, 10);
+  if (ult.length) {
+    const c = h('div', { class: 'card', id: 'ultime' }, h('h3', { text: 'Ultime 10 registrazioni' }));
+    for (const v of ult) c.appendChild(riga(v, [h('button', { type: 'button', class: 's', 'data-azione': 'correggi', text: 'Correggi esito', on: { click: () => applicaRegistro(L.correggiEsito(stato.registro, v.id)) } }), elim(v)]));
+    c.appendChild(h('p', { class: 'muted small', text: 'La confidenza non si può cambiare: per un errore, elimina la voce e registrala di nuovo. L\'app non può impedirti di rifarla dopo aver visto la soluzione.' }));
+    m.appendChild(c);
+  }
+}
+
+// ------------------------------------------------------------------ Analisi: Livelli e Unità (BRIEF passo2 §4.4, §4.5)
+const NOTA_DATI = 'Dati inseriti da te, non verificabili. Misurati sui tuoi esercizi (materiale editoriale), non sulla prova nazionale: possono essere diversi.';
+function rAnalisi(m) {
+  m.appendChild(h('h2', { text: 'Analisi' }));
+  const mk = (k, t) => h('button', { type: 'button', class: 's', id: 'a-' + k, text: t, 'aria-pressed': ui.analisi === k ? 'true' : 'false', on: { click: () => { ui.analisi = k; render(); } } });
+  m.appendChild(h('div', { class: 'sub' }, mk('livelli', 'Livelli'), mk('unita', 'Unità')));
+  const agg = L.aggrega_registro(stato.registro);
+  if (ui.analisi === 'livelli') rLivelli(m, agg); else rUnita(m, agg);
+}
+
+function rLivelli(m, agg) {
+  const v = L.valutaLivelli(agg);
+  const c = h('div', { class: 'card', id: 'card-livelli' }, h('h3', { text: 'Accuratezza per livello di confidenza' }));
+  for (const r of v.righe) c.appendChild(h('p', { class: 'prog', 'data-livello': r.livello, text: r.testo }));
+  if (v.inversione) c.appendChild(h('div', { class: 'nota', id: 'inversione', role: 'status', text: v.testo_inversione }));
+  c.appendChild(h('p', { class: 'muted small', text: 'Alta ≥ 80%, Media 50–80%, Bassa < 50% sono le definizioni dei tre pulsanti: se sei ben calibrato/a, le percentuali osservate cadono nelle fasce.' }));
+  c.appendChild(h('p', { class: 'small', text: NOTA_DATI }));
+  m.appendChild(c);
+  m.appendChild(h('p', { class: 'muted small', text: 'Contano solo le prime risposte valutate (' + agg.totale_prime + '); in sospeso e ripassi sono esclusi.' }));
+}
+
+function rUnita(m, agg) {
+  m.appendChild(h('div', { class: 'card' }, h('h3', { text: 'Come leggere queste pagine' }),
+    h('ul', {},
+      h('li', { text: 'L\'unità la assegni tu: se hai attribuito male gli esercizi alle unità, i dati non sono confrontabili.' }),
+      h('li', { text: '"Più debole della tua media" può voler dire esercizi più difficili, non una tua debolezza.' }),
+      h('li', {}, '21 confronti: se nessuna unità fosse davvero diversa, ci si aspetterebbero circa 1,5 falsi INDIZI (95%) e 0,4 falsi SEGNALI (99%) ', badge('CALCOLO', 'CALCOLO – SCRIPT_F3b'), '.'),
+      h('li', {}, 'Con 15 risposte al giorno per 30 giorni si hanno circa 21 risposte per unità: spesso vedrai "dati insufficienti" ', badge('STIMA'), '.'),
+      h('li', { text: NOTA_DATI }))));
+  for (const mat of L.MATERIE) {
+    const v = L.valutaUnita(agg, mat);
+    const c = h('div', { class: 'card', 'data-materia': mat }, h('h3', { text: L.NOME_MATERIA[mat] + ' (prime risposte con unità: ' + v.righe.reduce((a, r) => a + r.n, 0) + ')' }));
+    for (const r of v.righe) {
+      c.appendChild(h('div', { class: 'unita', 'data-unita': String(r.unita), 'data-codice': r.codice },
+        h('div', { class: 'ud', text: nomeUnita(mat, r.unita) }),
+        h('div', { class: 'prog small', text: r.testo }),
+        r.sufficiente ? h('div', { class: 'small' }, h('strong', { text: r.etichetta }), ' ', badge('EURISTICA')) : null,
+        r.sufficiente ? h('div', { class: 'muted small', text: L.testoRiferimento(r.n_rif) }) : null));
+    }
+    m.appendChild(c);
+  }
+}
+
+// ------------------------------------------------------------------ Strumenti
+function rStrumenti(m) {
+  m.appendChild(h('h2', { text: 'Strumenti' }));
+  const mk = (k, t) => h('button', { type: 'button', class: 's', text: t, 'aria-pressed': ui.strumento === k ? 'true' : 'false', on: { click: () => { ui.strumento = k; render(); } } });
+  m.appendChild(h('div', { class: 'sub' }, mk('calcolatore', 'Calcolatore'), mk('cronometro', 'Cronometro')));
+  if (ui.strumento === 'calcolatore') rCalcolatore(m); else rCronometro(m);
+}
+
+// ---- calcolatore
+function campoNumero(id, etichetta, onInput) {
+  return h('div', {}, h('label', { class: 'campo', for: id, text: etichetta }),
+    h('input', { type: 'text', id, inputmode: 'numeric', autocomplete: 'off', pattern: '[0-9]*', on: { input: onInput } }));
+}
+const valoreCampo = (id) => L.leggiIntero(document.getElementById(id).value);
+
+function righeEsito(r) {
+  const out = [];
+  out.push(h('p', { class: 'prog' }, 'Risposte date: ' + r.A + ' (giuste ' + r.C + ' + errate ' + r.E + '); omesse: ' + r.omesse + '.'));
+  out.push(h('p', { class: 'prog' }, h('strong', { text: 'Punteggio: ' + r.punteggio }), ' · soglia 18,0, non arrotondato: ',
+    h('span', { class: r.superato ? 'esito-ok' : 'esito-ko', text: r.superato ? 'SUPERATO' : 'NON SUPERATO' })));
+  out.push(r.raggiungibile
+    ? h('p', { class: 'prog', text: 'Con ' + r.A + ' risposte servono almeno ' + r.cmin + ' giuste; errori ammessi: ' + r.ammessi + '.' })
+    : h('p', { class: 'prog', text: 'Con meno di 18 risposte la soglia 18,0 non è raggiungibile (anche tutte giuste, il massimo è ' + r.A + ',0).' }));
+  return out;
+}
+
+function aggiornaUno() {
+  const box = document.getElementById('res-uno'); svuota(box);
+  const c = valoreCampo('in-c'), e = valoreCampo('in-e');
+  if (c.stato === 'errore' || e.stato === 'errore') { box.appendChild(h('p', { class: 'err', role: 'alert', text: 'Giuste ed errate devono essere numeri interi, 0 o più (solo cifre).' })); return; }
+  if (c.stato === 'vuoto' && e.stato === 'vuoto') { box.appendChild(h('p', { class: 'muted', text: 'Inserisci giuste ed errate (puoi lasciare vuoto = 0).' })); return; }
+  const r = L.calcola(c.valore || 0, e.valore || 0);
+  if (!r.ok) { box.appendChild(h('p', { class: 'err', role: 'alert', text: r.errore })); return; }
+  righeEsito(r).forEach((x) => box.appendChild(x));
+}
+
+function aggiornaEsame() {
+  const box = document.getElementById('res-esame'); svuota(box);
+  const coppie = []; let vuote = 0;
+  for (let i = 0; i < 3; i++) {
+    const c = valoreCampo('ex-c' + i), e = valoreCampo('ex-e' + i);
+    if (c.stato === 'errore' || e.stato === 'errore') { box.appendChild(h('p', { class: 'err', role: 'alert', text: L.MATERIE_ESAME[i] + ': giuste ed errate devono essere numeri interi, 0 o più (solo cifre).' })); return; }
+    if (c.stato === 'vuoto' && e.stato === 'vuoto') vuote++;
+    coppie.push({ C: c.valore || 0, E: e.valore || 0 });
+  }
+  if (vuote === 3) { box.appendChild(h('p', { class: 'muted', text: 'Inserisci giuste ed errate per le tre materie.' })); return; }
+  const r = L.esameCompleto(coppie);
+  if (!r.ok) { box.appendChild(h('p', { class: 'err', role: 'alert', text: r.errore })); return; }
+  r.sezioni.forEach((s) => box.appendChild(h('p', { class: 'prog' }, s.nome + ': ' + s.punteggio + ' – ', h('span', { class: s.superato ? 'esito-ok' : 'esito-ko', text: s.superato ? 'superato' : 'non superato' }))));
+  box.appendChild(h('p', { class: 'prog' }, h('strong', { text: r.testo.charAt(0).toUpperCase() + r.testo.slice(1) }), ' → sezione di graduatoria: +' + r.bonus + '.'));
+}
+
+function rCalcolatore(m) {
+  const uno = h('div', { class: 'card' }, h('h3', { text: 'Punteggio di un esame (31 quesiti)' }),
+    h('p', { class: 'small' }, '+1 giusta, 0 omessa, −0,1 errata; si supera con almeno 18,0, non arrotondato. ', badge('CERTO', 'CERTO – DM 941 art. 8 c.1 e c.3')),
+    h('div', { class: 'griglia2' }, campoNumero('in-c', 'Giuste', aggiornaUno), campoNumero('in-e', 'Errate', aggiornaUno)),
+    h('div', { class: 'risultato', id: 'res-uno', 'aria-live': 'polite' }));
+  m.appendChild(uno);
+  const tb = h('table', { id: 'tab-cmin' }, h('thead', {}, h('tr', {}, ['Risposte date', 'Giuste minime', 'Errori ammessi'].map((x) => h('th', { text: x })))),
+    h('tbody', {}, L.tabellaCmin().map((r) => h('tr', {}, h('td', { class: 'prog', text: String(r.A) }), h('td', { class: 'prog', text: String(r.cmin) }), h('td', { class: 'prog', text: String(r.ammessi) })))));
+  m.appendChild(h('div', { class: 'card' }, h('h3', { text: 'Giuste minime per numero di risposte' }),
+    h('p', { class: 'small' }, 'Si supera se 11·giuste − risposte ≥ 180. Sotto 18 risposte la soglia non è raggiungibile. ', badge('CERTO', 'CERTO – DM 941 art. 8 c.1 e c.3'), ' ', badge('CALCOLO', 'CALCOLO – motore, c_min')),
+    h('div', { class: 'tabwrap' }, tb)));
+  const righe = [0, 1, 2].map((i) => h('div', {}, h('h3', { text: L.MATERIE_ESAME[i], style: 'margin-top:8px' }),
+    h('div', { class: 'griglia2' }, campoNumero('ex-c' + i, 'Giuste', aggiornaEsame), campoNumero('ex-e' + i, 'Errate', aggiornaEsame))));
+  m.appendChild(h('div', { class: 'card' }, h('h3', { text: 'Esame completo (3 materie)' }),
+    h('p', { class: 'small' }, 'Ogni materia è valutata da sola. Sezione di graduatoria: +300 se 3 su 3, +200 se 2 su 3, +100 se 1 su 3. Il punteggio finale con i voti non è calcolato qui. ', badge('CERTO', 'CERTO – DM 941 art. 10')),
+    righe, h('div', { class: 'risultato', id: 'res-esame', 'aria-live': 'polite' })));
+  aggiornaUno(); aggiornaEsame();
+}
+
+// ---- cronometro (il tempo si calcola dagli istanti, non dai tick)
+const crono = { fase: 'fermo', inizio: 0, n: 0, riserva: 180, timer: null, lock: null, confermaStop: false, avvisati: {} };
+
+function vibra() { try { if (navigator.vibrate) navigator.vibrate(200); } catch (e) { /* niente */ } }
+async function prendiLock() { try { if (navigator.wakeLock && navigator.wakeLock.request) crono.lock = await navigator.wakeLock.request('screen'); } catch (e) { crono.lock = null; } }
+function rilasciaLock() { try { if (crono.lock && crono.lock.release) crono.lock.release(); } catch (e) { /* niente */ } crono.lock = null; }
+document.addEventListener('visibilitychange', () => {
+  if (crono.fase !== 'attivo') return;
+  tick();
+  if (document.visibilityState === 'visible') prendiLock();
+});
+
+function infoParametri(riserva) {
+  const p = L.parametriCrono(riserva);
+  return 'Budget: ' + L.fmt2(p.budget_s) + ' s per quesito; limite morbido: ' + L.fmt2(p.limite_s) + ' s. Obiettivi: ' +
+    p.checkpoint.map((c) => 'minuto ' + c.minuti + ' → ' + c.obiettivo).join(', ') + ' quesiti affrontati.';
+}
+
+function avviaCrono() {
+  crono.fase = 'attivo'; crono.inizio = Date.now(); crono.n = 0; crono.riserva = stato.impostazioni.riserva; crono.confermaStop = false; crono.avvisati = {};
+  prendiLock();
+  if (crono.timer) clearInterval(crono.timer);
+  crono.timer = setInterval(tick, 250);
+  render();
+}
+function fermaCrono() {
+  if (crono.timer) clearInterval(crono.timer);
+  crono.timer = null; crono.fase = 'fermo'; crono.confermaStop = false; rilasciaLock(); render();
+}
+function tick() {
+  if (crono.fase !== 'attivo') return;
+  const s = L.statoCrono((Date.now() - crono.inizio) / 1000, crono.riserva, crono.n);
+  for (const mnt of s.checkpointPassati) if (!crono.avvisati['c' + mnt]) { crono.avvisati['c' + mnt] = 1; vibra(); }
+  if (s.inRiserva && !crono.avvisati.r) { crono.avvisati.r = 1; vibra(); }
+  if (s.finito) {
+    crono.fase = 'finito'; if (crono.timer) clearInterval(crono.timer); crono.timer = null; rilasciaLock(); vibra();
+    if (ui.schermata === 'strumenti' && ui.strumento === 'cronometro') render();
+    return;
+  }
+  aggiornaCrono(s);
+}
+function aggiornaCrono(s) {
+  if (crono.fase !== 'attivo') return;
+  s = s || L.statoCrono((Date.now() - crono.inizio) / 1000, crono.riserva, crono.n);
+  const set = (id, t) => { const e = document.getElementById(id); if (e && e.textContent !== t) e.textContent = t; };
+  set('c-tempo', L.mmss(s.rimanente_s));
+  set('c-conta', String(crono.n));
+  const b = document.getElementById('c-box');
+  if (b) {
+    b.hidden = !s.box;
+    if (s.box) { set('c-box-testo', s.box.testo); }
+    else if (s.prossimo) { b.hidden = false; set('c-box-testo', 'Prossimo obiettivo: minuto ' + s.prossimo.minuti + ' ≈ ' + s.prossimo.obiettivo + ' quesiti affrontati.'); }
+  }
+  const r = document.getElementById('c-riserva-box'); if (r) r.hidden = !s.inRiserva;
+}
+
+function rCronometro(m) {
+  const riserva = stato.impostazioni.riserva;
+  if (crono.fase === 'fermo') {
+    const inp = h('input', { type: 'text', id: 'c-riserva-input', inputmode: 'numeric', autocomplete: 'off', value: String(riserva) });
+    const info = h('p', { class: 'small prog', id: 'c-info', text: infoParametri(riserva) });
+    const errore = h('p', { class: 'err', id: 'c-err', role: 'alert', hidden: true, text: 'La riserva deve essere un intero tra 0 e 600 secondi.' });
+    inp.addEventListener('input', () => {
+      const v = L.leggiIntero(inp.value);
+      if (v.stato === 'ok' && L.validaRiserva(v.valore)) { errore.hidden = true; stato.impostazioni.riserva = v.valore; salva(); info.textContent = infoParametri(v.valore); }
+      else errore.hidden = false;
+    });
+    m.appendChild(h('div', { class: 'card' }, h('h3', { text: 'Cronometro d\'esame (una materia)' }),
+      h('p', { class: 'small' }, 'Durata 50:00 per materia, non sospendibile. ', badge('CERTO', 'CERTO – DM 941 art. 7 c.3')),
+      h('button', { type: 'button', class: 'p blocco', id: 'c-avvia', text: 'Avvia (50:00)', style: 'text-align:center', on: { click: avviaCrono } }),
+      h('label', { class: 'campo', for: 'c-riserva-input', text: 'Riserva finale (secondi, 0–600)' }), inp, errore,
+      h('p', { class: 'small muted', style: 'margin-top:8px' }, 'La riserva serve per barrare i cerchietti delle omesse e per l\'ultimo controllo. ', badge('EURISTICA', 'EURISTICA – scelta modificabile')),
+      info,
+      h('p', { class: 'small muted' }, 'Il cronometro non viene salvato: se chiudi o ricarichi la pagina riparte da zero.')));
+    return;
+  }
+  if (crono.fase === 'finito') {
+    m.appendChild(h('div', { class: 'card' }, h('h3', { text: 'Tempo scaduto' }),
+      h('div', { class: 'tempo', text: '00:00' }),
+      h('p', { id: 'c-finale', text: 'Quesiti affrontati segnati: ' + crono.n + ' su 31.' }),
+      h('button', { type: 'button', class: 'p blocco', id: 'c-chiudi', text: 'Chiudi', style: 'text-align:center', on: { click: fermaCrono } })));
+    return;
+  }
+  const card = h('div', { class: 'card' },
+    h('div', { class: 'tempo', id: 'c-tempo', 'aria-label': 'Tempo rimanente', text: '50:00' }),
+    h('p', { class: 'muted small', style: 'text-align:center', text: 'quesiti affrontati' }),
+    h('div', { class: 'conta' },
+      h('button', { type: 'button', class: 's', id: 'c-meno', 'aria-label': 'Un quesito in meno', text: '−', on: { click: () => { if (crono.n > 0) { crono.n--; aggiornaCrono(); } } } }),
+      h('div', { class: 'n', id: 'c-conta', 'aria-live': 'polite', text: String(crono.n) }),
+      h('button', { type: 'button', class: 'p', id: 'c-piu', 'aria-label': 'Un quesito in più', text: '+', on: { click: () => { if (crono.n < M.NQ) { crono.n++; aggiornaCrono(); } } } })),
+    h('div', { class: 'box', id: 'c-box', hidden: true }, h('span', { id: 'c-box-testo' }), ' ', badge('EURISTICA')),
+    h('div', { class: 'box riserva', id: 'c-riserva-box', hidden: true }, h('strong', { text: 'Riserva: controllo finale' }), '. Barra i cerchietti delle domande che lasci in bianco e ricontrolla. ', badge('EURISTICA')),
+    crono.confermaStop
+      ? h('div', { class: 'riga' }, h('span', { text: 'Interrompere e azzerare il cronometro?' }),
+        h('button', { type: 'button', class: 'p', id: 'c-stop-si', text: 'Sì, interrompi', on: { click: fermaCrono } }),
+        h('button', { type: 'button', class: 's', text: 'Continua', on: { click: () => { crono.confermaStop = false; render(); } } }))
+      : h('div', { class: 'riga' }, h('button', { type: 'button', class: 't', id: 'c-interrompi', text: 'Interrompi', on: { click: () => { crono.confermaStop = true; render(); } } })));
+  m.appendChild(card);
+}
+
+// ------------------------------------------------------------------ Dati
+function rDati(m) {
+  m.appendChild(h('h2', { text: 'Dati' }));
+  if (ui.msg) m.appendChild(h('div', { class: 'nota', role: 'status', id: 'msg', text: ui.msg }));
+  const fp = h('input', { type: 'file', id: 'f-progressi', accept: '.json,application/json', style: 'display:none', on: { change: (e) => importaProgressiFile(e.target.files[0]) } });
+  const ta = h('textarea', { id: 't-incolla', placeholder: 'Oppure incolla qui il testo copiato con «Copia testo»', 'aria-label': 'Testo dei progressi da importare' });
+  m.appendChild(h('div', { class: 'card' }, h('h3', { text: 'I tuoi progressi' }),
+    h('p', { id: 'info-progressi', text: 'Moduli letti: ' + stato.letti.length + ' · voci del registro: ' + stato.registro.length + ' · riserva del cronometro: ' + stato.impostazioni.riserva + ' s.' }),
+    fp,
+    h('div', { class: 'riga' },
+      h('button', { type: 'button', class: 'p', id: 'b-esporta', text: 'Esporta (.json)', on: { click: esporta } }),
+      h('button', { type: 'button', class: 's', id: 'b-copia', text: 'Copia testo', on: { click: copiaTesto } }),
+      h('button', { type: 'button', class: 's', id: 'b-importa', text: 'Importa da file', on: { click: () => fp.click() } })),
+    ta,
+    h('div', { class: 'riga' }, h('button', { type: 'button', class: 's', id: 'b-importa-testo', text: 'Importa dal testo incollato', on: { click: () => importaProgressiTesto(ta.value) } })),
+    h('p', { class: 'muted small', text: 'L\'importazione unisce i moduli letti e le voci del registro (per identificativo: se una voce è già presente resta quella di questo dispositivo); la riserva di questo dispositivo resta com\'è. Il file si rifiuta per intero se contiene anche solo una voce non valida. Il salvataggio sta nel browser di questo dispositivo: esporta ogni tanto (Safari cancella i dati dopo 7 giorni senza visite).' })));
+  const ca = h('div', { class: 'card' }, h('h3', { text: 'Azzera' }));
+  if (!ui.conferma_azzera) ca.appendChild(h('button', { type: 'button', class: 's', id: 'b-azzera', text: 'Azzera i progressi…', on: { click: () => { ui.conferma_azzera = true; render(); } } }));
+  else {
+    ca.appendChild(h('p', { id: 'testo-azzera', text: 'Cancella i moduli letti (' + stato.letti.length + '), il registro (' + stato.registro.length + ' voci che verranno perse) e riporta la riserva a 180 s su questo dispositivo? Se non hai esportato, andranno persi.' }));
+    ca.appendChild(h('div', { class: 'riga' },
+      h('button', { type: 'button', class: 'p', id: 'b-azzera-si', text: 'Sì, azzera', on: { click: azzera } }),
+      h('button', { type: 'button', class: 's', text: 'Annulla', on: { click: () => { ui.conferma_azzera = false; render(); } } })));
+  }
+  m.appendChild(ca);
+}
+
+function messaggio(t) { ui.msg = t; render(); window.scrollTo(0, 0); }
+function leggiTesto(file) { return new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result)); fr.onerror = () => rej(fr.error); fr.readAsText(file); }); }
+
+function applicaImport(testo) {
+  let o;
+  try { o = JSON.parse(testo); } catch (e) { return messaggio('Importazione rifiutata: il contenuto non è un JSON valido.'); }
+  const v = L.validaProgresso(o);
+  if (!v.ok) return messaggio('Importazione rifiutata: ' + v.errori[0] + '.');
+  const r = L.unisci(stato, v);
+  stato = r.stato; salva();
+  messaggio('Importazione riuscita. Moduli letti aggiunti: ' + r.aggiunti + '; già presenti (ignorati): ' + r.gia_presenti + '. Voci del registro nuove: ' + r.voci_nuove + '; duplicate (ignorate): ' + r.voci_duplicate + '.');
+}
+async function importaProgressiFile(file) {
+  if (!file) return;
+  let t; try { t = await leggiTesto(file); } catch (e) { return messaggio('Importazione rifiutata: file non leggibile.'); }
+  applicaImport(t);
+}
+function importaProgressiTesto(t) { if (!t.trim()) return messaggio('Importazione rifiutata: il testo è vuoto.'); applicaImport(t); }
+function testoEsportazione() { return JSON.stringify(L.creaEsportazione(stato, new Date().toISOString())); }
+function esporta() {
+  const d = new Date(), p = (n) => String(n).padStart(2, '0');
+  const nome = 'triage_f4d_progressi_' + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + '.json';
+  try {
+    const url = URL.createObjectURL(new Blob([testoEsportazione()], { type: 'application/json' }));
+    const a = h('a', { href: url, download: nome }); document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    messaggio('File «' + nome + '» creato: controlla la cartella dei download.');
+  } catch (e) { messaggio('Non è stato possibile creare il file: usa «Copia testo».'); }
+}
+async function copiaTesto() {
+  const t = testoEsportazione();
+  try { await navigator.clipboard.writeText(t); return messaggio('Testo copiato negli appunti. Incollalo in un luogo sicuro.'); } catch (e) { /* ripiego */ }
+  try {
+    const ta = h('textarea', { style: 'position:fixed;left:0;top:0;opacity:0' }); ta.value = t; document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy'); document.body.removeChild(ta);
+    if (ok) return messaggio('Testo copiato negli appunti.');
+  } catch (e) { /* niente */ }
+  messaggio('Copia non riuscita: usa «Esporta (.json)».');
+}
+function azzera() { stato = L.statoVuoto(); ui.conferma_azzera = false; ui.corrente = null; ui.confermaElimina = null; salva(); messaggio('Progressi azzerati.'); }
+
+// ------------------------------------------------------------------ avvio
+caricaStato();
+render();
+})();
+</script>
+</body>
+</html>
